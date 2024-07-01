@@ -1,0 +1,508 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login Page</title>
+    <style>
+        body,
+        html {
+            margin: 0;
+            padding: 0;
+            height: 100%;
+            overflow: auto; /* Enable scrolling on the body */
+            background: #001b3d;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: flex-start; /* Changed from center to flex-start to allow scrolling */
+            font-family: Arial, sans-serif;
+            color: white;
+        }
+
+        .container {
+            width: 100%;
+            flex-grow: 1; /* Allow the container to grow and overflow naturally */
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .middle-section {
+            flex: 1;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            position: relative;
+        }
+
+        .container-marks,
+        .container-results {
+            display: flex;
+            flex-direction: column;
+            width: 600px; /* Increased width */
+            padding: 15px;
+            border: 1px solid skyblue;
+            border-radius: 5px;
+            margin: 5px;
+            background-color: rgba(255, 255, 255, 0.8);
+            color: black; /* Set font color to black */
+            z-index: 1;
+        }
+
+        .container-marks .input-group {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .container-marks label,
+        .container-marks select {
+            margin: 2px 0;
+        }
+
+        button {
+            height: 45px;
+            width: 100%;
+            background-color: skyblue;
+            border: none;
+            border-radius: 5px;
+            color: #333;
+            cursor: pointer;
+        }
+
+        button:hover {
+            background-color: #333;
+            color: skyblue;
+        }
+
+        .delete-button {
+            width: 80px; /* Fixed width for delete buttons */
+            background-color: red;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+
+        .subject-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+
+        @media (max-width: 600px) {
+            body,
+            html {
+                justify-content: flex-start; /* Start content from the top */
+                align-items: center; /* Center horizontally */
+                transform: scale(0.78); /* Scale down to 90% */
+                transform-origin: top center; /* Ensure scaling is centered from the top */
+                height: auto; /* Allow height to adjust based on content */
+            }
+        
+            .container-marks,
+            .container-results {
+                width: 85%;
+                padding: 15px;
+                margin: 0 auto; /* Center the container horizontally */
+            }
+        }
+
+    </style>
+</head>
+
+<body>
+    <div class="header">
+        <h1>Semester 3</h1>
+    </div>
+
+    <div id="newSchedule2" style="margin-top: 20px; padding: 10px; background-color: #ffffff; color: #000000; width: 90%; margin-left: auto; margin-right: auto;">
+        <!-- New Schedule will be inserted here -->
+    </div>
+
+    <div class="container-marks">
+        <form id="marksForm">
+            <div class="input-group">
+                <label for="subjectCode">Select Subject:</label>
+                <select id="subjectCode" required>
+                    <!-- Options will be inserted here dynamically -->
+                </select>
+                <label for="subjectGrade">Select Grade:</label>
+                <select id="subjectGrade" required>
+                    <option value="" disabled selected>Select Grade</option>
+                    <option value="A">A</option>
+                    <option value="A-">A-</option>
+                    <option value="B+">B+</option>
+                    <option value="B">B</option>
+                    <option value="B-">B-</option>
+                    <option value="C+">C+</option>
+                    <option value="C">C</option>
+                    <option value="C-">C-</option>
+                    <option value="D+">D+</option>
+                    <option value="D">D</option>
+                    <option value="D-">D-</option>
+                    <option value="F">F</option>
+                </select>
+            </div>
+            <button type="submit">Submit Mark</button>
+        </form>
+    </div>
+
+    <div class="container-results" style="display: none;">
+        <h3>Semester 3</h3>
+        <ul id="resultsList"></ul>
+        <div id="nextPageButton">
+            <button id="resultButton">Result</button>
+        </div>
+    </div>
+
+    <script type="module">
+        // Import the functions you need from the SDKs you need
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-app.js";
+        import { getAnalytics } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-analytics.js";
+        import { getDatabase, ref, get, set, child, remove } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-database.js";
+
+        // Your web app's Firebase configuration
+        const firebaseConfig = {
+            apiKey: "AIzaSyDyXr6XMGjgv8XG1U0Owly-PWvAQE7wZY4",
+            authDomain: "academic-student-a62c6.firebaseapp.com",
+            databaseURL: "https://academic-student-a62c6-default-rtdb.asia-southeast1.firebasedatabase.app",
+            projectId: "academic-student-a62c6",
+            storageBucket: "academic-student-a62c6.appspot.com",
+            messagingSenderId: "336896456108",
+            appId: "1:336896456108:web:fb112db2f114afc33d7609",
+            measurementId: "G-TENKLEKM50"
+        };
+
+        // Initialize Firebase
+        const app = initializeApp(firebaseConfig);
+        const analytics = getAnalytics(app);
+        const database = getDatabase(app);
+
+        // Retrieve URL parameters
+        const urlParams = new URLSearchParams(window.location.search);
+        const username = urlParams.get('username');
+        const password = urlParams.get('password');
+
+        console.log('Retrieved username:', username);  // Debugging statement
+console.log('Retrieved password:', password);  // Debugging statement
+
+        // Function to verify username and password
+        async function verifyUser(username, password) {
+            const dbRef = ref(database);
+            const snapshot = await get(child(dbRef, 'users'));
+            if (snapshot.exists()) {
+                const users = snapshot.val();
+                for (const [userId, userData] of Object.entries(users)) {
+                    if (userData.username === username && userData.password === password) {
+                        // Store user ID in sessionStorage
+                        sessionStorage.setItem('userId', userId);
+                        return userData;
+                    }
+                }
+                console.log("Invalid username or password");
+                alert("Invalid username or password.");
+                window.location.href = 'loginPage.html';
+                return null;
+            } else {
+                console.log("No data available");
+                alert("Invalid username or password.");
+                window.location.href = 'loginPage.html';
+                return null;
+            }
+        }
+
+        // Subject mapping
+        const subjectMapping = {
+            "smb20102": "SMB20102 - BAHASA INGGERIS UNTUK KOMUNIKASI UMUM [ENGLISH FOR GENERAL COMMUNICATION] 2",
+            "nmj20003": "NMJ20003 - ALGORITHMA DAN STRUKTUR-STRUKTUR DATA [ALGORITHM AND DATA STRUCTURES]",
+            "smq22103": "SMQ22103 - MATEMATIK DISKRIT & LINEAR ALGEBRA [DISCRETE MATHEMATICS & LINEAR ALGEBRA]",
+            "nmj20404": "NMJ20404 - ELEKTRONIK DIGIT II [DIGITAL ELECTRONICS II]",
+            "nmj20904": "NMJ20904 - LITAR ELEKTRONIK ANALOG II [ANALOG ELECTRONIC CIRCUIT II]",
+            "uzw164": "UZW164 - KURSUS PERSIJILAN BULAN SABIT MERAH MALAYSIA I",
+            "uuw130": "UUW130 - FALSAFAH DAN ISU SEMASA",
+            "ekt102": "EKT102 - ASAS KEJURUTERAAN ELEKTRONIK",
+            "eqt101": "EQT101 - MATEMATIK KEJURUTERAAN I",
+            "ekt120": "EKT120 - PENGATURCARAAN KOMPUTER",
+            "ekt101": "EKT101 - TEORI LITAR ELEKTRIK"
+        };
+
+        let subjectsSemester3WithFailed = [];
+
+        // Load user data and initialize the page
+        document.addEventListener('DOMContentLoaded', async function () {
+            const userData = await verifyUser(username, password);
+            if (userData) {
+                document.querySelector('.container-marks').style.display = 'block';
+                loadSubmittedData(username);
+            }
+
+            // Retrieve the stored schedule and display it
+            const storedSchedule = sessionStorage.getItem('newSchedule2');
+            const schedule1 = sessionStorage.getItem('schedule1');
+            const schedule2 = sessionStorage.getItem('schedule2');
+
+            if (storedSchedule) {
+            const newSchedule2Container = document.getElementById('newSchedule2');
+            newSchedule2Container.innerHTML = storedSchedule;
+
+                    if (schedule1 && schedule2) {
+                        const schedule1Container = document.createElement('div');
+                        schedule1Container.innerHTML = schedule1;
+                        newSchedule2Container.appendChild(schedule1Container);
+        
+                        const schedule2Container = document.createElement('div');
+                        schedule2Container.innerHTML = schedule2;
+                        newSchedule2Container.appendChild(schedule2Container);
+                    }
+                }
+
+            // Populate the subject select options based on subjectsSemester3WithFailed
+            subjectsSemester3WithFailed = JSON.parse(sessionStorage.getItem('subjectsSemester3WithFailed')) || [];
+
+            const subjectSelect = document.getElementById('subjectCode');
+            subjectsSemester3WithFailed.forEach(subject => {
+                const option = document.createElement('option');
+                option.value = subject.code.toLowerCase();
+                option.textContent = `${subject.code} - ${subject.name}`;
+                subjectSelect.appendChild(option);
+            });
+        });
+
+        function addSubjectGrade(subjectCode, grade) {
+    const userId = sessionStorage.getItem('userId');
+    if (!userId) {
+        console.error('No user signed in');
+        return;
+    }
+
+    const dbRef = ref(database, 'users/' + userId + '/subjects');
+    get(dbRef).then((snapshot) => {
+        let newSubjectCode = subjectCode.toLowerCase();
+        let existingGrade = null;
+        if (snapshot.exists()) {
+            const subjects = snapshot.val();
+            const subjectKeys = Object.keys(subjects);
+            let maxVersion = 1;
+
+            subjectKeys.forEach(key => {
+                const baseKey = key.split('_v')[0];
+                if (baseKey === subjectCode.toLowerCase()) {
+                    const versionMatch = key.match(/_v(\d+)$/);
+                    const version = versionMatch ? parseInt(versionMatch[1], 10) : 1;
+                    if (version >= maxVersion) {
+                        maxVersion = version + 1;
+                    }
+                    if (version > 1) {
+                        existingGrade = subjects[key]?.grade;
+                        newSubjectCode = key; // Focus on the latest version
+                    } else {
+                        existingGrade = subjects[key]?.grade;
+                    }
+                }
+            });
+
+            if (existingGrade && ['D', 'D-', 'F'].includes(existingGrade) && newSubjectCode === subjectCode.toLowerCase()) {
+                newSubjectCode = `${subjectCode.toLowerCase()}_v${maxVersion}`;
+            }
+        }
+
+        const newDbRef = ref(database, 'users/' + userId + '/subjects/' + newSubjectCode);
+        set(newDbRef, { grade: grade }).then(() => {
+            loadSubmittedData(userId); // Reload the submitted data to reflect the changes
+        }).catch((error) => {
+            console.error('Error adding or updating subject grade:', error);
+        });
+    }).catch((error) => {
+        console.error('Error checking existing subject:', error);
+    });
+}
+
+
+function loadSubmittedData(userId) {
+    const dbRef = ref(database, 'users/' + userId + '/subjects');
+    get(dbRef).then((snapshot) => {
+        if (snapshot.exists()) {
+            const resultsList = document.getElementById('resultsList');
+            resultsList.innerHTML = ''; // Clear existing data
+
+            subjectsSemester3WithFailed = JSON.parse(sessionStorage.getItem('subjectsSemester3WithFailed')) || [];
+            let latestSubjects = {};
+
+            snapshot.forEach((subjectSnapshot) => {
+                const subjectCode = subjectSnapshot.key;
+                const grade = subjectSnapshot.val().grade;
+                const subjectBaseCode = subjectCode.split('_v')[0];
+                const subjectVersion = subjectCode.includes('_v') ? parseInt(subjectCode.split('_v')[1]) : 1;
+
+                // Exclude failing subjects
+                if (['D', 'D-', 'F'].includes(grade)) {
+                    return;
+                }
+
+                if (!latestSubjects[subjectBaseCode] || (latestSubjects[subjectBaseCode].version < subjectVersion)) {
+                    latestSubjects[subjectBaseCode] = { subjectCode, grade, version: subjectVersion };
+                }
+            });
+
+            for (const baseCode in latestSubjects) {
+                const subjectData = latestSubjects[baseCode];
+                const subject = subjectsSemester3WithFailed.find(sub => sub.code.toLowerCase() === baseCode.toLowerCase());
+                if (subject) {
+                    const subjectFullName = subjectMapping[baseCode.toLowerCase()] || baseCode; // Get full name from mapping
+                    displaySubmittedData(subjectFullName, subjectData.grade, subjectData.subjectCode); // Pass the subjectCode for proper deletion
+                }
+            }
+
+            document.querySelector('.container-results').style.display = 'block';
+            checkAllSubjectsSubmitted();
+        }
+    }).catch((error) => {
+        console.error('Error loading submitted data:', error);
+    });
+}
+
+
+function displaySubmittedData(subjectFullName, grade, subjectCode) {
+    const resultsList = document.getElementById('resultsList');
+    const listItem = document.createElement('li');
+    listItem.className = "subject-item";
+    listItem.innerHTML = `
+        ${subjectFullName}: ${grade}
+        <button class="delete-button" onclick="deleteSubject('${subjectCode}')">Delete</button>
+    `;
+    resultsList.appendChild(listItem);
+    document.querySelector('.container-results').style.display = 'block';
+}
+
+
+async function deleteSubject(subjectCode) {
+    const userId = sessionStorage.getItem('userId');
+    if (!userId) {
+        console.error('No user signed in');
+        return;
+    }
+
+    const confirmation = confirm(`Are you sure you want to delete the grade for the subject ${subjectCode.split('_v')[0]}?`);
+    if (!confirmation) {
+        return; // Exit the function if the user cancels
+    }
+
+    const subjectRef = ref(database, 'users/' + userId + '/subjects/' + subjectCode);
+    await remove(subjectRef).then(() => {
+        loadSubmittedData(userId); // Reload the submitted data to reflect the changes
+    }).catch((error) => {
+        console.error('Error removing subject:', error);
+    });
+}
+
+function checkAllSubjectsSubmitted() {
+    const userId = sessionStorage.getItem('userId');
+    const DetectSemester2 = sessionStorage.getItem('DetectSemester2');
+
+    if (!userId) {
+        console.error('No user signed in');
+        return;
+    }
+
+    const dbRef = ref(database, 'users/' + userId + '/subjects');
+    get(dbRef).then((snapshot) => {
+        if (snapshot.exists()) {
+            let totalCredits = 0;
+            let latestSubjects = {};
+
+            snapshot.forEach((subjectSnapshot) => {
+                const subjectCode = subjectSnapshot.key;
+                const grade = subjectSnapshot.val().grade;
+                const subjectBaseCode = subjectCode.split('_v')[0];
+                const subjectVersion = subjectCode.includes('_v') ? parseInt(subjectCode.split('_v')[1]) : 1;
+
+                // Exclude failing subjects
+                if (['D', 'D-', 'F'].includes(grade)) {
+                    return;
+                }
+
+                if (!latestSubjects[subjectBaseCode] || (latestSubjects[subjectBaseCode].version < subjectVersion)) {
+                    latestSubjects[subjectBaseCode] = { grade, version: subjectVersion };
+                }
+            });
+
+            for (const baseCode in latestSubjects) {
+                const subjectData = latestSubjects[baseCode];
+                const subject = subjectsSemester3WithFailed.find(sub => sub.code.toLowerCase() === baseCode.toLowerCase());
+                if (subject && !['D', 'D-', 'F'].includes(subjectData.grade)) {
+                    totalCredits += subject.creditHour;
+                }
+            }
+
+            if ((DetectSemester2 === 'P1' && totalCredits >= 8 && totalCredits <= 12) || 
+                (DetectSemester2 === 'Active' && totalCredits >= 16 && totalCredits <= 20) || 
+                (DetectSemester2 === 'P2' && totalCredits >= 8 && totalCredits <= 10)) {
+                document.getElementById('nextPageButton').style.display = 'block';
+            } else {
+                document.getElementById('nextPageButton').style.display = 'none';
+            }
+        }
+    }).catch((error) => {
+        console.error('Error checking subjects:', error);
+    });
+}
+
+// Event listener for marks form submission
+document.getElementById('marksForm').addEventListener('submit', (e) => {
+            e.preventDefault();
+            const subjectCode = document.getElementById('subjectCode').value;
+            const grade = document.getElementById('subjectGrade').value;
+
+            const confirmation = confirm(`Are you sure you want to submit the grade ${grade} for the subject ${subjectCode}?`);
+            if (confirmation) {
+                addSubjectGrade(subjectCode, grade);
+            }
+        });
+
+document.getElementById('resultButton').addEventListener('click', () => {
+    const selectedSubjects = Array.from(document.querySelectorAll('#resultsList .subject-item'))
+        .map(item => {
+            const subjectCode = item.querySelector('button').getAttribute('onclick').match(/deleteSubject\('(.+?)'\)/)[1];
+            return subjectCode; // Store the full subject code including version
+        });
+        // Debug: Print selected subjects
+    console.log('Selected Subjects:', selectedSubjects);
+
+    const subjectsToCheckVersion2 = ["uzw164", "uuw130", "ekt102", "eqt101", "ekt120", "ekt101"];
+
+    const unselectedSubjects = subjectsSemester3WithFailed.filter(subject => {
+        const subjectCodeLower = subject.code.toLowerCase();
+        const subjectBaseCode = subjectCodeLower.split('_v')[0];
+        const isVersion2Required = subjectsToCheckVersion2.includes(subjectBaseCode);
+
+        // Check if the subject requires version 2 and version 2 is not selected
+        const isVersion2NotSelected = isVersion2Required && !selectedSubjects.includes(`${subjectBaseCode}_v2`);
+
+        // Check if the subject is not selected at all and is not in subjectsToCheckVersion2
+        const isNotSelectedAtAll = !isVersion2Required && !selectedSubjects.includes(subjectCodeLower) && !selectedSubjects.some(code => code.startsWith(subjectBaseCode));
+
+        // Return true if either condition is met
+        return isNotSelectedAtAll || isVersion2NotSelected;
+    });
+
+    sessionStorage.setItem('UnusedSubjectsSemester3', JSON.stringify(unselectedSubjects));
+
+    // Debug: Print the unselectedSubjects array in a readable format
+    console.table('Unselected Subjects:', unselectedSubjects.map(subject => ({
+        code: subject.code,
+        name: subject.name
+    })));
+
+    window.location.href = `https://aimanjitra.github.io/firebase2/sem3.html?username=${username}&password=${password}`;
+});
+
+
+        // Expose deleteSubject function to global scope
+        window.deleteSubject = deleteSubject;
+    </script>
+</body>
+
+</html>

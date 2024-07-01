@@ -1,0 +1,405 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Semester 2 - UniMAP</title>
+    <style>
+        body,
+        html {
+            margin: 0;
+            padding: 0;
+            height: 100%;
+            overflow: auto; /* Enable scrolling on the body */
+            background: #001b3d;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: flex-start; /* Changed from center to flex-start to allow scrolling */
+            font-family: Arial, sans-serif;
+            color: white;
+        }
+
+        .container {
+            width: 100%;
+            flex-grow: 1; /* Allow the container to grow and overflow naturally */
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .middle-section {
+            flex: 1;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            position: relative;
+        }
+
+        .container-marks,
+        .container-results {
+            display: flex;
+            flex-direction: column;
+            width: 600px; /* Increased width */
+            padding: 15px;
+            border: 1px solid skyblue;
+            border-radius: 5px;
+            margin: 5px;
+            background-color: rgba(255, 255, 255, 0.8);
+            color: black; /* Set font color to black */
+            z-index: 1;
+        }
+
+        .container-marks .input-group {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .container-marks label,
+        .container-marks select {
+            margin: 2px 0;
+        }
+
+        button {
+            height: 45px;
+            width: 100%;
+            background-color: skyblue;
+            border: none;
+            border-radius: 5px;
+            color: #333;
+            cursor: pointer;
+        }
+
+        button:hover {
+            background-color: #333;
+            color: skyblue;
+        }
+
+        .delete-button {
+            width: 80px; /* Fixed width for delete buttons */
+            background-color: red;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+
+        .subject-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+
+        @media (max-width: 600px) {
+            body,
+            html {
+                justify-content: flex-start; /* Start content from the top */
+                align-items: center; /* Center horizontally */
+                transform: scale(0.9); /* Scale down to 90% */
+                transform-origin: top center; /* Ensure scaling is centered from the top */
+                height: auto; /* Allow height to adjust based on content */
+            }
+        
+            .container-marks,
+            .container-results {
+                width: 85%;
+                padding: 15px;
+                margin: 0 auto; /* Center the container horizontally */
+            }
+        }
+
+    </style>
+</head>
+
+<body>
+    <div class="header">
+        <h1>Semester 2</h1>
+    </div>
+
+    <div id="newSchedule1" style="margin-top: 20px; padding: 10px; background-color: #ffffff; color: #000000; width: 90%; margin-left: auto; margin-right: auto;">
+        <!-- New Schedule will be inserted here -->
+    </div>
+
+    <div class="container-marks">
+        <form id="marksForm">
+            <div class="input-group">
+                <label for="subjectCode">Select Subject:</label>
+                <select id="subjectCode" required>
+                    <option value="" disabled selected>Select Subject</option>
+                    <option value="uzw195">UZW195 - RADIO KAMPUS [CAMPUS RADIO]</option>
+                    <option value="ekt124">EKT124 - ELEKTRONIK DIGIT I [DIGITAL ELECTRONICS I]</option>
+                    <option value="ekt103">EKT103 - KEJURUTERAAN ELEKTRIK [ELECTRICAL ENGINEERING]</option>
+                    <option value="ekt119">EKT119 - LITAR ELEKTRIK II [ELECTRIC CIRCUIT II]</option>
+                    <option value="eqt102">EQT102 - MATEMATIK KEJURUTERAAN II [ENGINEERING MATHEMATICS II]</option>
+                    <option value="ekt104">EKT104 - LITAR ELEKTRONIK ANALOG 1 [ANALOG ELECTRONIC CIRCUITS 1]</option>
+                </select>
+                <label for="subjectGrade">Select Grade:</label>
+                <select id="subjectGrade" required>
+                    <option value="" disabled selected>Select Grade</option>
+                    <option value="A">A</option>
+                    <option value="A-">A-</option>
+                    <option value="B+">B+</option>
+                    <option value="B">B</option>
+                    <option value="B-">B-</option>
+                    <option value="C+">C+</option>
+                    <option value="C">C</option>
+                    <option value="C-">C-</option>
+                    <option value="D+">D+</option>
+                    <option value="D">D</option>
+                    <option value="D-">D-</option>
+                    <option value="F">F</option>
+                </select>
+            </div>
+            <button type="submit">Submit Mark</button>
+        </form>
+    </div>
+
+    <div class="container-results" style="display: none;">
+        <h3>Semester 2</h3>
+        <ul id="resultsList"></ul>
+        <div id="nextPageButton" style="display: none;">
+        </div>
+    </div>
+
+    <!-- Include Firebase SDK -->
+    <script type="module">
+        // Import the functions you need from the SDKs you need
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-app.js";
+        import { getAnalytics } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-analytics.js";
+        import { getDatabase, ref, get, set, child, remove } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-database.js";
+
+        // Your web app's Firebase configuration
+        const firebaseConfig = {
+            apiKey: "AIzaSyDyXr6XMGjgv8XG1U0Owly-PWvAQE7wZY4",
+            authDomain: "academic-student-a62c6.firebaseapp.com",
+            databaseURL: "https://academic-student-a62c6-default-rtdb.asia-southeast1.firebasedatabase.app",
+            projectId: "academic-student-a62c6",
+            storageBucket: "academic-student-a62c6.appspot.com",
+            messagingSenderId: "336896456108",
+            appId: "1:336896456108:web:fb112db2f114afc33d7609",
+            measurementId: "G-TENKLEKM50"
+        };
+
+        // Initialize Firebase
+        const app = initializeApp(firebaseConfig);
+        const analytics = getAnalytics(app);
+        const database = getDatabase(app);
+
+        // Mapping subject codes to full subject names
+        const subjectsSemester2 = [
+            { code: 'uzw195', name: 'UZW195 - RADIO KAMPUS [CAMPUS RADIO]', creditHour: 3 },
+            { code: 'ekt124', name: 'EKT124 - ELEKTRONIK DIGIT I [DIGITAL ELECTRONICS I]', creditHour: 3 },
+            { code: 'ekt103', name: 'EKT103 - KEJURUTERAAN ELEKTRIK [ELECTRICAL ENGINEERING]', creditHour: 3 },
+            { code: 'ekt119', name: 'EKT119 - LITAR ELEKTRIK II [ELECTRIC CIRCUIT II]', creditHour: 3 },
+            { code: 'eqt102', name: 'EQT102 - MATEMATIK KEJURUTERAAN II [ENGINEERING MATHEMATICS II]', creditHour: 3 },
+            { code: 'ekt104', name: 'EKT104 - LITAR ELEKTRONIK ANALOG 1 [ANALOG ELECTRONIC CIRCUITS 1]', creditHour: 3 }
+        ];
+
+        // Mapping subject codes to full subject names
+        const subjectMapping = {
+            "uzw195": "UZW195 - RADIO KAMPUS [CAMPUS RADIO]",
+            "ekt124": "EKT124 - ELEKTRONIK DIGIT I [DIGITAL ELECTRONICS I]",
+            "ekt103": "EKT103 - KEJURUTERAAN ELEKTRIK [ELECTRICAL ENGINEERING]",
+            "ekt119": "EKT119 - LITAR ELEKTRIK II [ELECTRIC CIRCUIT II]",
+            "eqt102": "EQT102 - MATEMATIK KEJURUTERAAN II [ENGINEERING MATHEMATICS II]",
+            "ekt104": "EKT104 - LITAR ELEKTRONIK ANALOG 1 [ANALOG ELECTRONIC CIRCUITS 1]"
+        };
+
+        // Retrieve URL parameters
+        const urlParams = new URLSearchParams(window.location.search);
+        const username = urlParams.get('username');
+        const password = urlParams.get('password');
+
+        // Function to verify username and password
+        async function verifyUser(username, password) {
+            const dbRef = ref(database);
+            const snapshot = await get(child(dbRef, 'users'));
+            if (snapshot.exists()) {
+                const users = snapshot.val();
+                for (const [userId, userData] of Object.entries(users)) {
+                    if (userData.username === username && userData.password === password) {
+                        // Store user ID in sessionStorage
+                        sessionStorage.setItem('userId', userId);
+                        return userData;
+                    }
+                }
+                console.log("Invalid username or password");
+                alert("Invalid username or password.");
+                window.location.href = 'loginPage.html';
+                return null;
+            } else {
+                console.log("No data available");
+                alert("Invalid username or password.");
+                window.location.href = 'loginPage.html';
+                return null;
+            }
+        }
+
+        // Load user data and initialize the page
+        document.addEventListener('DOMContentLoaded', async function() {
+            const userData = await verifyUser(username, password);
+            if (userData) {
+                document.querySelector('.container-marks').style.display = 'block';
+                loadSubmittedData(userData);
+            }
+        });
+
+        const storedSchedule = sessionStorage.getItem('newSchedule1');
+        if (storedSchedule) {
+            const newSchedule1Container = document.getElementById('newSchedule1');
+            newSchedule1Container.innerHTML = storedSchedule;
+        }
+
+        // Function to add or update subject grade in Realtime Database
+        function addSubjectGrade(subjectCode, grade) {
+            const userId = sessionStorage.getItem('userId');
+            if (!userId) {
+                console.error('No user signed in');
+                return;
+            }
+
+            const dbRef = ref(database, 'users/' + userId + '/subjects/' + subjectCode);
+            set(dbRef, { grade: grade }).then(() => {
+                console.log('Subject grade added or updated successfully.');
+                loadSubmittedData(userId); // Reload the submitted data to reflect the changes
+            }).catch((error) => {
+                console.error('Error adding or updating subject grade:', error);
+            });
+        }
+
+        // Function to load submitted data and display it
+        function loadSubmittedData(userData) {
+            const userId = sessionStorage.getItem('userId');
+            if (!userId) {
+                console.error('No user signed in');
+                return;
+            }
+
+            const dbRef = ref(database, 'users/' + userId + '/subjects');
+            get(dbRef).then((snapshot) => {
+                if (snapshot.exists()) {
+                    const resultsList = document.getElementById('resultsList');
+                    resultsList.innerHTML = ''; // Clear existing data
+                    snapshot.forEach((subjectSnapshot) => {
+                        const subject = subjectSnapshot.key;
+                        const grade = subjectSnapshot.val().grade;
+                        if (subjectMapping.hasOwnProperty(subject)) {
+                            displaySubmittedData(subject, grade);
+                        }
+                    });
+                    document.querySelector('.container-results').style.display = 'block';
+                    checkAllSubjectsSubmitted();
+                }
+            }).catch((error) => {
+                console.error('Error loading submitted data:', error);
+            });
+        }
+
+        // Function to display submitted data on the page
+        function displaySubmittedData(subjectCode, grade) {
+            const resultsList = document.getElementById('resultsList');
+            const listItem = document.createElement('li');
+            listItem.className = "subject-item";
+            const subjectFullName = subjectMapping[subjectCode] || subjectCode; // Get full name from mapping
+            listItem.innerHTML = `
+                ${subjectFullName}: ${grade}
+                <button class="delete-button" onclick="deleteSubject('${subjectCode}')">Delete</button>
+            `;
+            resultsList.appendChild(listItem);
+            document.querySelector('.container-results').style.display = 'block';
+        }
+
+        // Function to delete only the grade of a subject
+        async function deleteSubject(subjectCode) {
+            const userId = sessionStorage.getItem('userId');
+            if (!userId) {
+                console.error('No user signed in');
+                return;
+            }
+
+            // Ask for confirmation before deleting the subject
+            const subjectFullName = subjectMapping[subjectCode] || subjectCode; // Get full name from mapping
+            const confirmation = confirm(`Are you sure you want to delete the grade for the subject ${subjectFullName}?`);
+            if (!confirmation) {
+                return; // Exit the function if the user cancels
+            }
+
+            const dbRef = ref(database, 'users/' + userId + '/subjects/' + subjectCode);
+
+            // Check if the subject exists in the database
+            const snapshot = await get(dbRef);
+            if (snapshot.exists()) {
+                // If the subject exists, set the grade to null
+                const gradeRef = ref(database, 'users/' + userId + '/subjects/' + subjectCode + '/grade');
+                set(gradeRef, null).then(() => {
+                    console.log('Grade removed successfully.');
+                    loadSubmittedData(userId); // Reload the submitted data to reflect the changes
+                }).catch((error) => {
+                    console.error('Error removing grade:', error);
+                });
+            } else {
+                console.error('Subject does not exist in the database.');
+            }
+        }
+
+        // Function to check if all subjects are submitted
+        function checkAllSubjectsSubmitted() {
+            const userId = sessionStorage.getItem('userId');
+            const DetectSemester1 = sessionStorage.getItem('DetectSemester1');
+            console.log('DetectSemester1:', DetectSemester1); // Debug statement
+
+            if (!userId) {
+                console.error('No user signed in');
+                return;
+            }
+
+            const dbRef = ref(database, 'users/' + userId + '/subjects');
+            get(dbRef).then((snapshot) => {
+                if (snapshot.exists()) {
+                    let totalCredits = 0;
+                    snapshot.forEach((subjectSnapshot) => {
+                        const subjectCode = subjectSnapshot.key;
+                        const subject = subjectsSemester2.find(sub => sub.code === subjectCode);
+                        if (subject) {
+                            totalCredits += subject.creditHour;
+                        }
+                    });
+
+                    console.log('Total Credits:', totalCredits); // Debug statement
+
+                    if ((DetectSemester1 === 'P1' && totalCredits >= 8 && totalCredits <= 12) ||
+                        (DetectSemester1 === 'Active' && totalCredits >= 17)) {
+                        console.log('Condition met for displaying Result button'); // Debug statement
+                        document.getElementById('nextPageButton').innerHTML = `<button onclick="window.location.href='https://aimanjitra.github.io/firebase2/sem2.html?username=${username}&password=${password}'">Result</button>`;
+                        document.getElementById('nextPageButton').style.display = 'block';
+                    } else {
+                        console.log('Condition not met for displaying Result button'); // Debug statement
+                        document.getElementById('nextPageButton').style.display = 'none';
+                    }
+                }
+            }).catch((error) => {
+                console.error('Error checking subjects:', error);
+            });
+        }
+
+        // Event listener for marks form submission
+        document.getElementById('marksForm').addEventListener('submit', (e) => {
+            e.preventDefault();
+            const subjectCode = document.getElementById('subjectCode').value;
+            const grade = document.getElementById('subjectGrade').value;
+
+            const subjectFullName = subjectMapping[subjectCode] || subjectCode; // Get full name from mapping
+            const confirmation = confirm(`Are you sure you want to submit the grade ${grade} for the subject ${subjectFullName}?`);
+            if (confirmation) {
+                addSubjectGrade(subjectCode, grade);
+            }
+        });
+
+        // Expose deleteSubject function to global scope
+        window.deleteSubject = deleteSubject;
+    </script>
+</body>
+
+</html>

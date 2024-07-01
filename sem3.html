@@ -3,14 +3,17 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="styles.css">
     <title>Peribadi Pelajar UniMAP</title>
     <style>
         body, html {
             margin: 0;
             padding: 0;
             height: 100%;
-            background: url('C:/Users/DELL/Downloads/minimal-abstract-dark-blue-gradient-banner-background-design-photo.jpg') no-repeat center center fixed;
-            background-size: cover;
+            background-image: url('minimal-abstract-dark-blue-gradient-banner-background-design-photo.jpg');
+            background-size: cover; /* Ensures the background covers the entire screen */
+            background-repeat: no-repeat; /* Prevents the background from repeating */
+            background-attachment: fixed; /* Makes the background fixed during scrolling */
         }
         .container {
             height: 100vh;

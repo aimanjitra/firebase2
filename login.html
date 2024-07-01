@@ -207,12 +207,12 @@ function verifyUser(username, password) {
 
                     // Redirect based on the number of subjects with grades
                     if (subjectCount > 14) {
-                        window.location.href = `https://aimanjitra.github.io/firebase/result.html?username=${username}&password=${password}`;
+                        window.location.href = `https://aimanjitra.github.io/firebase2/result.html?username=${username}&password=${password}`;
                     } else {
-                        window.location.href = `https://aimanjitra.github.io/firebase/select1.html?username=${username}&password=${password}`;
+                        window.location.href = `https://aimanjitra.github.io/firebase2/select1.html?username=${username}&password=${password}`;
                     }
                 } else {
-                    window.location.href = `https://aimanjitra.github.io/firebase/select1.html?username=${username}&password=${password}`;
+                    window.location.href = `https://aimanjitra.github.io/firebase2/select1.html?username=${username}&password=${password}`;
                 }
             }).catch((error) => {
                 console.error('Error reading subjects data:', error);

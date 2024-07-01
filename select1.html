@@ -11,7 +11,8 @@
             padding: 0;
             height: 100%;
             overflow-y: auto; /* Enable vertical scrolling */
-            background: #001b3d;
+            background: url('C:/Users/DELL/Downloads/minimal-abstract-dark-blue-gradient-banner-background-design-photo.jpg') no-repeat center center fixed;
+            background-size: cover;
             display: flex;
             flex-direction: column;
             align-items: center;
@@ -117,6 +118,9 @@
     <div class="container-results" style="display: none;">
         <h3>Semester 1</h3>
         <ul id="resultsList"></ul>
+        <div id="totalCreditsContainer">
+            <strong>Total Credits: <span id="totalCredits">0</span></strong>
+        </div> 
         <div id="nextPageButton" style="display: none;">
             <button id="resultButton">Result</button>
         </div>
@@ -165,6 +169,17 @@
             { code: "ekt101", name: "TEORI LITAR ELEKTRIK [ELECTRIC CIRCUIT THEORY]", credit: 4 }
         ];
 
+        // Mapping subject codes to credit hours
+        const subjectCredits = {
+            "uzw164": 1,
+            "uuw130": 2,
+            "ekt102": 3,
+            "eqt101": 3,
+            "ekt120": 4,
+            "ekt101": 4
+        };
+
+
         // Populate New Schedule for Semester 1
         function populateSemester1Schedule() {
             const semester1SubjectsList = document.getElementById('semester1SubjectsList');
@@ -197,37 +212,43 @@
 
         // Function to load submitted data and display it
         function loadSubmittedData(userId) {
-            const dbRef = ref(database, 'users/' + userId + '/subjects');
-            get(dbRef).then((snapshot) => {
-                if (snapshot.exists()) {
-                    const resultsList = document.getElementById('resultsList');
-                    resultsList.innerHTML = ''; // Clear existing data
-                    snapshot.forEach((subjectSnapshot) => {
-                        const subject = subjectSnapshot.key;
-                        const grade = subjectSnapshot.val().grade;
-                        displaySubmittedData(subject, grade);
-                    });
-                    document.querySelector('.container-results').style.display = 'block';
-                    checkAllSubjectsSubmitted();
-                }
-            }).catch((error) => {
-                console.error('Error loading submitted data:', error);
+    const dbRef = ref(database, 'users/' + userId + '/subjects');
+    get(dbRef).then((snapshot) => {
+        if (snapshot.exists()) {
+            const resultsList = document.getElementById('resultsList');
+            resultsList.innerHTML = ''; // Clear existing data
+            let totalCredits = 0;
+            snapshot.forEach((subjectSnapshot) => {
+                const subject = subjectSnapshot.key;
+                const grade = subjectSnapshot.val().grade;
+                displaySubmittedData(subject, grade);
+                // Add credit hours for all subjects
+                totalCredits += subjectCredits[subject] || 0;
             });
+            document.querySelector('.container-results').style.display = 'block';
+            document.getElementById('totalCredits').textContent = totalCredits; // Update total credits in the UI
+            checkAllSubjectsSubmitted();
         }
+    }).catch((error) => {
+        console.error('Error loading submitted data:', error);
+    });
+}
+
 
         // Function to display submitted data on the page
         function displaySubmittedData(subjectCode, grade) {
-            // Check if the subject is in Semester 1
-            const semester1Subjects = ["uzw164", "uuw130", "ekt102", "eqt101", "ekt120", "ekt101"];
-            if (semester1Subjects.includes(subjectCode)) {
-                const resultsList = document.getElementById('resultsList');
-                const listItem = document.createElement('li');
-                const subjectFullName = subjectMapping[subjectCode] || subjectCode; // Get full name from mapping
-                listItem.textContent = `${subjectFullName}: ${grade}`;
-                resultsList.appendChild(listItem);
-                document.querySelector('.container-results').style.display = 'block';
-            }
-        }
+    // Check if the subject is in Semester 1
+    const semester1Subjects = ["uzw164", "uuw130", "ekt102", "eqt101", "ekt120", "ekt101"];
+    if (semester1Subjects.includes(subjectCode)) {
+        const resultsList = document.getElementById('resultsList');
+        const listItem = document.createElement('li');
+        const subjectFullName = subjectMapping[subjectCode] || subjectCode; // Get full name from mapping
+        listItem.textContent = `${subjectFullName}: ${grade}`;
+        resultsList.appendChild(listItem);
+        document.querySelector('.container-results').style.display = 'block';
+    }
+}
+
 
         function checkAllSubjectsSubmitted() {
     const userId = sessionStorage.getItem('userId');
@@ -250,7 +271,7 @@
             const username = sessionStorage.getItem('username');
             const password = sessionStorage.getItem('password');
             const resultButton = document.getElementById('resultButton');
-            const nextPageUrl = `https://aimanjitra.github.io/firebase2/select1.html?username=${username}&password=${password}`;
+            const nextPageUrl = `https://aimanjitra.github.io/firebase2/sem1.html?username=${username}&password=${password}`;
             resultButton.setAttribute('onclick', `window.location.href='${nextPageUrl}'`);
             document.getElementById('nextPageButton').style.display = 'block';
         } else {

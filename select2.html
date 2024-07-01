@@ -12,7 +12,8 @@
             padding: 0;
             height: 100%;
             overflow: auto; /* Enable scrolling on the body */
-            background: #001b3d;
+            background: url('C:/Users/DELL/Downloads/minimal-abstract-dark-blue-gradient-banner-background-design-photo.jpg') no-repeat center center fixed;
+            background-size: cover;
             display: flex;
             flex-direction: column;
             align-items: center;
@@ -159,6 +160,9 @@
     <div class="container-results" style="display: none;">
         <h3>Semester 2</h3>
         <ul id="resultsList"></ul>
+        <div id="totalCreditsContainer">
+            <strong>Total Credits: <span id="totalCredits">0</span></strong>
+        </div> 
         <div id="nextPageButton" style="display: none;">
         </div>
     </div>
@@ -367,7 +371,7 @@
                         }
                     });
 
-                    console.log('Total Credits:', totalCredits); // Debug statement
+                    document.getElementById('totalCredits').textContent = totalCredits; // Update total credits in the UI
 
                     if ((DetectSemester1 === 'P1' && totalCredits >= 8 && totalCredits <= 12) ||
                         (DetectSemester1 === 'Active' && totalCredits >= 17)) {

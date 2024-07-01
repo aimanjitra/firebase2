@@ -1,0 +1,285 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Marks Submission</title>
+    <style>
+        body,
+        html {
+            margin: 0;
+            padding: 0;
+            height: 100%;
+            overflow-y: auto; /* Enable vertical scrolling */
+            background: #001b3d;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: flex-start; /* Align items at the top */
+            font-family: Arial, sans-serif;
+            color: white;
+        }
+
+        .container-marks, .container-results, .container-schedule {
+            display: flex;
+            flex-direction: column;
+            width: 600px;
+            padding: 15px;
+            border: 1px solid skyblue;
+            border-radius: 5px;
+            margin: 5px;
+            background-color: rgba(255, 255, 255, 0.8);
+            color: black;
+            z-index: 1;
+        }
+
+        .container-marks .input-group {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .container-marks label,
+        .container-marks select {
+            margin: 2px 0;
+        }
+
+        button {
+            height: 45px;
+            width: 100%;
+            background-color: skyblue;
+            border: none;
+            border-radius: 5px;
+            color: #333;
+            cursor: pointer;
+        }
+
+        button:hover {
+            background-color: #333;
+            color: skyblue;
+        }
+
+        
+           @media (max-width: 700px) {
+        .container-marks, .container-results, .container-schedule {
+            width: 85%;
+            padding: 15px;
+            margin: 0 auto;
+        }
+           }
+        
+    </style>
+</head>
+<div class="header">
+    <h1>Semester 1</h1>
+</div>
+<body>
+    <!-- New Schedule for Semester 1 Container -->
+    <div class="container-schedule" id="newSchedule1">
+        <h3>Schedule For Semester 1</h3>
+        <p>For this semester, you need to take the following subjects:</p>
+        <ul id="semester1SubjectsList"></ul>
+        <p>This is all the subjects that you need to take for this semester. You need to fulfill this subject count.</p>
+    </div>
+    <div class="container-marks">
+        <form id="marksForm">
+            <div class="input-group">
+                <label for="subjectCode">Select Subject:</label>
+                <select id="subjectCode" required>
+                    <option value="" disabled selected>Select Subject</option>
+                    <option value="uzw164">UZW164 - KURSUS PERSIJILAN BULAN SABIT MERAH MALAYSIA I</option>
+                    <option value="uuw130">UUW130 - FALSAFAH DAN ISU SEMASA</option>
+                    <option value="ekt102">EKT102 - ASAS KEJURUTERAAN ELEKTRONIK</option>
+                    <option value="eqt101">EQT101 - MATEMATIK KEJURUTERAAN I</option>
+                    <option value="ekt120">EKT120 - PENGATURCARAAN KOMPUTER</option>
+                    <option value="ekt101">EKT101 - TEORI LITAR ELEKTRIK</option>
+                </select>
+                <label for="subjectGrade">Select Grade:</label>
+                <select id="subjectGrade" required>
+                    <option value="" disabled selected>Select Grade</option>
+                    <option value="A">A</option>
+                    <option value="A-">A-</option>
+                    <option value="B+">B+</option>
+                    <option value="B">B</option>
+                    <option value="B-">B-</option>
+                    <option value="C+">C+</option>
+                    <option value="C">C</option>
+                    <option value="C-">C-</option>
+                    <option value="D+">D+</option>
+                    <option value="D">D</option>
+                    <option value="D-">D-</option>
+                    <option value="F">F</option>
+                </select>
+            </div>
+            <button type="submit">Submit Mark</button>
+        </form>
+    </div>
+
+    <div class="container-results" style="display: none;">
+        <h3>Semester 1</h3>
+        <ul id="resultsList"></ul>
+        <div id="nextPageButton" style="display: none;">
+            <button id="resultButton">Result</button>
+        </div>
+    </div>
+
+    <script type="module">
+        // Import the functions you need from the SDKs you need
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-app.js";
+        import { getAnalytics } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-analytics.js";
+        import { getDatabase, ref, get, set, update, child } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-database.js";
+
+        // Your web app's Firebase configuration
+        const firebaseConfig = {
+            apiKey: "AIzaSyDyXr6XMGjgv8XG1U0Owly-PWvAQE7wZY4",
+            authDomain: "academic-student-a62c6.firebaseapp.com",
+            databaseURL: "https://academic-student-a62c6-default-rtdb.asia-southeast1.firebasedatabase.app",
+            projectId: "academic-student-a62c6",
+            storageBucket: "academic-student-a62c6.appspot.com",
+            messagingSenderId: "336896456108",
+            appId: "1:336896456108:web:fb112db2f114afc33d7609",
+            measurementId: "G-TENKLEKM50"
+        };
+
+        // Initialize Firebase
+        const app = initializeApp(firebaseConfig);
+        const analytics = getAnalytics(app);
+        const database = getDatabase(app);
+
+        // Mapping subject codes to full subject names
+        const subjectMapping = {
+            "uzw164": "UZW164 - KURSUS PERSIJILAN BULAN SABIT MERAH MALAYSIA I [CERTIFICATION COURSE OF MALAYSIAN RED CRESCENT SOCIETY I]",
+            "uuw130": "UUW130 - FALSAFAH DAN ISU SEMASA [PHILOSOPHY AND CURRENT ISSUES]",
+            "ekt102": "EKT102 - ASAS KEJURUTERAAN ELEKTRONIK [BASIC ELECTRONIC ENGINEERING]",
+            "eqt101": "EQT101 - MATEMATIK KEJURUTERAAN I [ENGINEERING MATHEMATICS I]",
+            "ekt120": "EKT120 - PENGATURCARAAN KOMPUTER [COMPUTER PROGRAMMING]",
+            "ekt101": "EKT101 - TEORI LITAR ELEKTRIK [ELECTRIC CIRCUIT THEORY]"
+        };
+
+        // Subjects for Semester 1 with credit hours
+        const semester1Subjects = [
+            { code: "uzw164", name: "KURSUS PERSIJILAN BULAN SABIT MERAH MALAYSIA I [CERTIFICATION COURSE OF MALAYSIAN RED CRESCENT SOCIETY I]", credit: 1 },
+            { code: "uuw130", name: "FALSAFAH DAN ISU SEMASA [PHILOSOPHY AND CURRENT ISSUES]", credit: 2 },
+            { code: "ekt102", name: "ASAS KEJURUTERAAN ELEKTRONIK [BASIC ELECTRONIC ENGINEERING]", credit: 3 },
+            { code: "eqt101", name: "MATEMATIK KEJURUTERAAN I [ENGINEERING MATHEMATICS I]", credit: 3 },
+            { code: "ekt120", name: "PENGATURCARAAN KOMPUTER [COMPUTER PROGRAMMING]", credit: 4 },
+            { code: "ekt101", name: "TEORI LITAR ELEKTRIK [ELECTRIC CIRCUIT THEORY]", credit: 4 }
+        ];
+
+        // Populate New Schedule for Semester 1
+        function populateSemester1Schedule() {
+            const semester1SubjectsList = document.getElementById('semester1SubjectsList');
+            semester1Subjects.forEach(subject => {
+                const listItem = document.createElement('li');
+                listItem.textContent = `${subject.code.toUpperCase()} - ${subject.name} [${subject.credit} Kredit]`;
+                semester1SubjectsList.appendChild(listItem);
+            });
+        }
+
+        // Call the function to populate Semester 1 schedule
+        populateSemester1Schedule();
+
+        // Function to add or update subject grade in Realtime Database
+        function addSubjectGrade(subjectCode, grade) {
+            const userId = sessionStorage.getItem('userId');
+            if (!userId) {
+                console.error('No user signed in');
+                return;
+            }
+
+            const dbRef = ref(database, 'users/' + userId + '/subjects/' + subjectCode);
+            set(dbRef, { grade: grade }).then(() => {
+                console.log('Subject grade added or updated successfully.');
+                loadSubmittedData(userId); // Reload the submitted data to reflect the changes
+            }).catch((error) => {
+                console.error('Error adding or updating subject grade:', error);
+            });
+        }
+
+        // Function to load submitted data and display it
+        function loadSubmittedData(userId) {
+            const dbRef = ref(database, 'users/' + userId + '/subjects');
+            get(dbRef).then((snapshot) => {
+                if (snapshot.exists()) {
+                    const resultsList = document.getElementById('resultsList');
+                    resultsList.innerHTML = ''; // Clear existing data
+                    snapshot.forEach((subjectSnapshot) => {
+                        const subject = subjectSnapshot.key;
+                        const grade = subjectSnapshot.val().grade;
+                        displaySubmittedData(subject, grade);
+                    });
+                    document.querySelector('.container-results').style.display = 'block';
+                    checkAllSubjectsSubmitted();
+                }
+            }).catch((error) => {
+                console.error('Error loading submitted data:', error);
+            });
+        }
+
+        // Function to display submitted data on the page
+        function displaySubmittedData(subjectCode, grade) {
+            // Check if the subject is in Semester 1
+            const semester1Subjects = ["uzw164", "uuw130", "ekt102", "eqt101", "ekt120", "ekt101"];
+            if (semester1Subjects.includes(subjectCode)) {
+                const resultsList = document.getElementById('resultsList');
+                const listItem = document.createElement('li');
+                const subjectFullName = subjectMapping[subjectCode] || subjectCode; // Get full name from mapping
+                listItem.textContent = `${subjectFullName}: ${grade}`;
+                resultsList.appendChild(listItem);
+                document.querySelector('.container-results').style.display = 'block';
+            }
+        }
+
+        function checkAllSubjectsSubmitted() {
+    const userId = sessionStorage.getItem('userId');
+    if (!userId) {
+        console.error('No user signed in');
+        return;
+    }
+    const dbRef = ref(database, 'users/' + userId + '/subjects');
+    get(dbRef).then((snapshot) => {
+        const semester1Subjects = ["uzw164", "uuw130", "ekt102", "eqt101", "ekt120", "ekt101"];
+        let submittedSubjects = new Set();
+        snapshot.forEach((subjectSnapshot) => {
+            submittedSubjects.add(subjectSnapshot.key);
+        });
+
+        // Check if all semester 1 subjects are submitted
+        const allSubmitted = semester1Subjects.every(subject => submittedSubjects.has(subject));
+
+        if (allSubmitted) {
+            const username = sessionStorage.getItem('username');
+            const password = sessionStorage.getItem('password');
+            const resultButton = document.getElementById('resultButton');
+            const nextPageUrl = `C:/Users/DELL/Downloads/web/sem1.html?username=${username}&password=${password}`;
+            resultButton.setAttribute('onclick', `window.location.href='${nextPageUrl}'`);
+            document.getElementById('nextPageButton').style.display = 'block';
+        } else {
+            document.getElementById('nextPageButton').style.display = 'none';
+        }
+    }).catch((error) => {
+        console.error('Error checking subjects:', error);
+    });
+}
+
+
+        // Retrieve stored userId from sessionStorage
+        const userId = sessionStorage.getItem('userId');
+        if (userId) {
+            loadSubmittedData(userId);
+        }
+
+        // Event listener for marks form submission
+        document.getElementById('marksForm').addEventListener('submit', (e) => {
+            e.preventDefault();
+            const subjectCode = document.getElementById('subjectCode').value;
+            const grade = document.getElementById('subjectGrade').value;
+            
+            const subjectFullName = subjectMapping[subjectCode] || subjectCode; // Get full name from mapping
+            const confirmation = confirm(`Are you sure you want to submit the grade ${grade} for the subject ${subjectFullName}?`);
+            if (confirmation) {
+                addSubjectGrade(subjectCode, grade);
+            }
+        });
+    </script>
+</body>
+</html>

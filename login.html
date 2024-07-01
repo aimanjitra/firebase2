@@ -10,7 +10,8 @@
             padding: 0;
             height: 100%;
             overflow: hidden;
-            background: #001b3d;
+            background: url('C:/Users/DELL/Downloads/minimal-abstract-dark-blue-gradient-banner-background-design-photo.jpg') no-repeat center center fixed;
+            background-size: cover;
             display: flex;
             flex-direction: column;
             align-items: center;
@@ -22,11 +23,12 @@
             display: flex;
             flex-direction: column;
             width: 450px;
-            padding: 15px;
+            padding: 20px;
             border: 1px solid skyblue;
-            border-radius: 5px;
+            border-radius: 10px;
             margin: 10px;
-            background-color: rgba(255, 255, 255, 0.8);
+            background-color: rgba(255, 255, 255, 0.9);
+            box-shadow: 0px 0px 15px rgba(0, 0, 0, 0.3);
             z-index: 1;
         }
         .input-group {
@@ -38,7 +40,19 @@
             margin: 10px 0;
             height: 35px;
             padding: 7px;
+            border-radius: 5px;
+            border: 1px solid #ccc;
         }
+        .header h1 {
+            font-size: 28px; /* Increased font size */
+            margin-bottom: 20px;
+            font-family: 'Roboto', Arial, sans-serif; /* Modern font */
+            color: white; /* White font color */
+            text-align: center; /* Center alignment */
+            font-weight: bold; /* Bold font weight */
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5); /* Subtle text shadow */
+        }
+
         button {
             height: 45px;
             width: 100%;
@@ -47,6 +61,7 @@
             border-radius: 5px;
             color: #333;
             cursor: pointer;
+            font-size: 16px;
         }
         button:hover {
             background-color: #333;
@@ -62,6 +77,8 @@
         a {
             color: white;
             text-decoration: underline;
+            margin-top: 15px;
+            display: inline-block;
         }
         a:hover {
             text-decoration: underline;
@@ -91,6 +108,7 @@
         </form>
     </div>
     <a href="C:\Users\DELL\Downloads\web\.vscode\system.html">Forget your password?</a>
+    <a href="C:\Users\DELL\Downloads\web\.vscode\.vscode\register.html">Register</a>
 
     <!-- Include Firebase SDK -->
     <script type="module">
@@ -146,49 +164,48 @@
         }
 
         // Function to verify username and password
-function verifyUser(username, password) {
-    const dbRef = ref(database);
-    get(child(dbRef, 'users')).then((snapshot) => {
-        if (snapshot.exists()) {
-            let authenticated = false;
-            let userId = null;
-            let usernameExists = false;
-            snapshot.forEach((userSnapshot) => {
-                const userData = userSnapshot.val();
-                if (userData.username === username) {
-                    usernameExists = true;
-                    if (userData.password === password) {
-                        authenticated = true;
-                        userId = userSnapshot.key;
+        function verifyUser(username, password) {
+            const dbRef = ref(database);
+            get(child(dbRef, 'users')).then((snapshot) => {
+                if (snapshot.exists()) {
+                    let authenticated = false;
+                    let userId = null;
+                    let usernameExists = false;
+                    snapshot.forEach((userSnapshot) => {
+                        const userData = userSnapshot.val();
+                        if (userData.username === username) {
+                            usernameExists = true;
+                            if (userData.password === password) {
+                                authenticated = true;
+                                userId = userSnapshot.key;
 
-                        // Store the userId for later use
-                        sessionStorage.setItem('userId', userId);
-                        sessionStorage.setItem('username', username);
-                        sessionStorage.setItem('password', password);
+                                // Store the userId for later use
+                                sessionStorage.setItem('userId', userId);
+                                sessionStorage.setItem('username', username);
+                                sessionStorage.setItem('password', password);
 
-                        // Initialize subjects for the user
-                        initializeSubjects(userId);
+                                // Initialize subjects for the user
+                                initializeSubjects(userId);
 
-                        // Check the number of subjects with grades
-                        checkGradesAndRedirect(userId);
+                                // Check the number of subjects with grades
+                                checkGradesAndRedirect(userId);
+                            }
+                        }
+                    });
+                    if (!authenticated) {
+                        if (usernameExists) {
+                            alert('Incorrect password.');
+                        } else {
+                            alert('Invalid username or password.');
+                        }
                     }
-                }
-            });
-            if (!authenticated) {
-                if (usernameExists) {
-                    alert('Incorrect password.');
                 } else {
-                    alert('Invalid username or password.');
+                    console.log("No data available");
                 }
-            }
-        } else {
-            console.log("No data available");
+            }).catch((error) => {
+                console.error('Error reading user data:', error);
+            });
         }
-    }).catch((error) => {
-        console.error('Error reading user data:', error);
-    });
-}
-
 
         function checkGradesAndRedirect(userId) {
             const dbRef = ref(database, 'users/' + userId + '/subjects');
@@ -207,7 +224,7 @@ function verifyUser(username, password) {
 
                     // Redirect based on the number of subjects with grades
                     if (subjectCount > 14) {
-                        window.location.href = `https://aimanjitra.github.io/firebase2/result.html?username=${username}&password=${password}`;
+                        window.location.href = `https://aimanjitra.github.io/firebase2/result1.html?username=${username}&password=${password}`;
                     } else {
                         window.location.href = `https://aimanjitra.github.io/firebase2/select1.html?username=${username}&password=${password}`;
                     }

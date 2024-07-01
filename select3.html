@@ -12,7 +12,8 @@
             padding: 0;
             height: 100%;
             overflow: auto; /* Enable scrolling on the body */
-            background: #001b3d;
+            background: url('C:/Users/DELL/Downloads/minimal-abstract-dark-blue-gradient-banner-background-design-photo.jpg') no-repeat center center fixed;
+            background-size: cover;
             display: flex;
             flex-direction: column;
             align-items: center;
@@ -153,6 +154,9 @@
     <div class="container-results" style="display: none;">
         <h3>Semester 3</h3>
         <ul id="resultsList"></ul>
+        <div id="totalCreditsContainer">
+            <strong>Total Credits: <span id="totalCredits">0</span></strong>
+        </div>        
         <div id="nextPageButton">
             <button id="resultButton">Result</button>
         </div>
@@ -231,6 +235,8 @@ console.log('Retrieved password:', password);  // Debugging statement
 
         let subjectsSemester3WithFailed = [];
 
+        const subjectsToCheckVersion2and4 = ["uzw164", "uuw130", "ekt102", "eqt101", "ekt120", "ekt101"];
+
         // Load user data and initialize the page
         document.addEventListener('DOMContentLoaded', async function () {
             const userData = await verifyUser(username, password);
@@ -282,6 +288,8 @@ console.log('Retrieved password:', password);  // Debugging statement
     get(dbRef).then((snapshot) => {
         let newSubjectCode = subjectCode.toLowerCase();
         let existingGrade = null;
+        const subjectsToCheckVersion2and4 = ["uzw164", "uuw130", "ekt102", "eqt101", "ekt120", "ekt101"];
+
         if (snapshot.exists()) {
             const subjects = snapshot.val();
             const subjectKeys = Object.keys(subjects);
@@ -304,8 +312,13 @@ console.log('Retrieved password:', password);  // Debugging statement
                 }
             });
 
-            if (existingGrade && ['D', 'D-', 'F'].includes(existingGrade) && newSubjectCode === subjectCode.toLowerCase()) {
-                newSubjectCode = `${subjectCode.toLowerCase()}_v${maxVersion}`;
+            // Create a new version for failing grades for specific subjects
+            if (subjectsToCheckVersion2and4.includes(subjectCode.toLowerCase())) {
+                if (['D', 'D-', 'F'].includes(grade)) {
+                    newSubjectCode = `${subjectCode.toLowerCase()}_v2`;
+                } else if (['D', 'D-', 'F'].includes(existingGrade)) {
+                    newSubjectCode = `${subjectCode.toLowerCase()}_v4`;
+                }
             }
         }
 
@@ -321,6 +334,8 @@ console.log('Retrieved password:', password);  // Debugging statement
 }
 
 
+
+
 function loadSubmittedData(userId) {
     const dbRef = ref(database, 'users/' + userId + '/subjects');
     get(dbRef).then((snapshot) => {
@@ -330,6 +345,8 @@ function loadSubmittedData(userId) {
 
             subjectsSemester3WithFailed = JSON.parse(sessionStorage.getItem('subjectsSemester3WithFailed')) || [];
             let latestSubjects = {};
+            let totalCredits = 0;
+            const subjectsToCheckVersion2and4 = ["uzw164", "uuw130", "ekt102", "eqt101", "ekt120", "ekt101"];
 
             snapshot.forEach((subjectSnapshot) => {
                 const subjectCode = subjectSnapshot.key;
@@ -337,11 +354,7 @@ function loadSubmittedData(userId) {
                 const subjectBaseCode = subjectCode.split('_v')[0];
                 const subjectVersion = subjectCode.includes('_v') ? parseInt(subjectCode.split('_v')[1]) : 1;
 
-                // Exclude failing subjects
-                if (['D', 'D-', 'F'].includes(grade)) {
-                    return;
-                }
-
+                // Store only the latest version of subjects
                 if (!latestSubjects[subjectBaseCode] || (latestSubjects[subjectBaseCode].version < subjectVersion)) {
                     latestSubjects[subjectBaseCode] = { subjectCode, grade, version: subjectVersion };
                 }
@@ -352,17 +365,32 @@ function loadSubmittedData(userId) {
                 const subject = subjectsSemester3WithFailed.find(sub => sub.code.toLowerCase() === baseCode.toLowerCase());
                 if (subject) {
                     const subjectFullName = subjectMapping[baseCode.toLowerCase()] || baseCode; // Get full name from mapping
-                    displaySubmittedData(subjectFullName, subjectData.grade, subjectData.subjectCode); // Pass the subjectCode for proper deletion
+
+                    // Only display version 2 and version 4 of the subject for specific subjects
+                    if (subjectsToCheckVersion2and4.includes(baseCode.toLowerCase())) {
+                        if (subjectData.version === 2 || subjectData.version === 4) {
+                            displaySubmittedData(subjectFullName, subjectData.grade, subjectData.subjectCode); // Pass the subjectCode for proper deletion
+                            totalCredits += subject.creditHour;
+                        }
+                    } else {
+                        displaySubmittedData(subjectFullName, subjectData.grade, subjectData.subjectCode); // Pass the subjectCode for proper deletion
+                        // Include all subjects in the total credits calculation
+                        totalCredits += subject.creditHour;
+                    }
                 }
             }
 
             document.querySelector('.container-results').style.display = 'block';
-            checkAllSubjectsSubmitted();
+            document.getElementById('totalCredits').textContent = totalCredits; // Update total credits in the UI
+            checkAllSubjectsSubmitted(userId); // Ensure this is called to check if all subjects are submitted and update the total credits
         }
     }).catch((error) => {
         console.error('Error loading submitted data:', error);
     });
 }
+
+
+
 
 
 function displaySubmittedData(subjectFullName, grade, subjectCode) {
@@ -398,8 +426,7 @@ async function deleteSubject(subjectCode) {
     });
 }
 
-function checkAllSubjectsSubmitted() {
-    const userId = sessionStorage.getItem('userId');
+function checkAllSubjectsSubmitted(userId) {
     const DetectSemester2 = sessionStorage.getItem('DetectSemester2');
 
     if (!userId) {
@@ -412,6 +439,7 @@ function checkAllSubjectsSubmitted() {
         if (snapshot.exists()) {
             let totalCredits = 0;
             let latestSubjects = {};
+            const subjectsToCheckVersion2and4 = ["uzw164", "uuw130", "ekt102", "eqt101", "ekt120", "ekt101"];
 
             snapshot.forEach((subjectSnapshot) => {
                 const subjectCode = subjectSnapshot.key;
@@ -419,11 +447,7 @@ function checkAllSubjectsSubmitted() {
                 const subjectBaseCode = subjectCode.split('_v')[0];
                 const subjectVersion = subjectCode.includes('_v') ? parseInt(subjectCode.split('_v')[1]) : 1;
 
-                // Exclude failing subjects
-                if (['D', 'D-', 'F'].includes(grade)) {
-                    return;
-                }
-
+                // Include failing subjects only if they are version 2 or 4 for specific subjects
                 if (!latestSubjects[subjectBaseCode] || (latestSubjects[subjectBaseCode].version < subjectVersion)) {
                     latestSubjects[subjectBaseCode] = { grade, version: subjectVersion };
                 }
@@ -432,10 +456,18 @@ function checkAllSubjectsSubmitted() {
             for (const baseCode in latestSubjects) {
                 const subjectData = latestSubjects[baseCode];
                 const subject = subjectsSemester3WithFailed.find(sub => sub.code.toLowerCase() === baseCode.toLowerCase());
-                if (subject && !['D', 'D-', 'F'].includes(subjectData.grade)) {
-                    totalCredits += subject.creditHour;
+                if (subject) {
+                    if (subjectsToCheckVersion2and4.includes(baseCode.toLowerCase())) {
+                        if (subjectData.version === 2 || subjectData.version === 4) {
+                            totalCredits += subject.creditHour;
+                        }
+                    } else {
+                        totalCredits += subject.creditHour;
+                    }
                 }
             }
+
+            document.getElementById('totalCredits').textContent = totalCredits; // Update total credits in the UI
 
             if ((DetectSemester2 === 'P1' && totalCredits >= 8 && totalCredits <= 12) || 
                 (DetectSemester2 === 'Active' && totalCredits >= 16 && totalCredits <= 20) || 
@@ -449,6 +481,7 @@ function checkAllSubjectsSubmitted() {
         console.error('Error checking subjects:', error);
     });
 }
+
 
 // Event listener for marks form submission
 document.getElementById('marksForm').addEventListener('submit', (e) => {

@@ -1,0 +1,676 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap">
+    <title>Peribadi Pelajar UniMAP</title>
+    <style>
+        body, html {
+            margin: 0;
+            padding: 0;
+            height: 100%;
+            background-image: url('minimal-abstract-dark-blue-gradient-banner-background-design-photo.jpg');
+            background-size: cover; /* Ensures the background covers the entire screen */
+            background-repeat: no-repeat; /* Prevents the background from repeating */
+            background-attachment: fixed; /* Makes the background fixed during scrolling */
+        }
+
+        .container {
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            font-family: Arial, sans-serif;
+            color: white;
+            overflow-y: auto;
+        }
+
+        .biodata {
+            padding: 20px;
+        }
+
+        h1 {
+            font-size: 24px;
+            text-align: center;
+            margin-bottom: 10px;
+        }
+
+        h2 {
+            font-size: 18px;
+            margin-bottom: 5px;
+        }
+
+        h3 {
+            font-size: 18px;
+            margin-top: 0px;
+            margin-left: 10px;
+            margin-right: auto;
+            background-color: rgb(180, 172, 172);
+            color: black;
+            padding: 10px;
+        }
+
+        table {
+            width: 90%;
+            border-collapse: collapse;
+            margin-top: 0px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        th, td {
+            border: 1px solid black;
+            padding: 8px;
+            text-align: left;
+        }
+
+        th {
+            background-color: white;
+            color: black;
+        }
+
+        td {
+            background-color: white;
+            color: black;
+        }
+
+        #GPA4 {
+            text-align: right;
+            position: relative;
+            padding-right: 20px;
+        }
+
+        #GPA4::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            bottom: 0;
+            left: 0;
+            width: 25%;
+            background-color: rgb(180, 172, 172);
+            margin: auto;
+        }
+
+        #blankCell {
+            background-color: rgb(180, 172, 172);
+        }
+
+        .semester-selector-container {
+            display: flex;
+            justify-content: center;
+            margin-top: 20px;
+        }
+
+        .semester-selector-box {
+            display: inline-block;
+            padding: 4px 8px;
+            border-radius: 4px;
+            cursor: pointer;
+            margin-right: 10px;
+        }
+
+        .navigation-button-container {
+            display: flex;
+            justify-content: center;
+            margin-top: 20px;
+            margin-bottom: 20px;
+        }
+
+        .navigation-button {
+            display: inline-block;
+            padding: 4px 8px;
+            border: 1px solid black;
+            border-radius: 4px;
+            cursor: pointer;
+            background-color: white;
+            color: black;
+            margin-right: 10px;
+            width: 100px;
+            text-align: center;
+        }
+
+        .navigation-button:hover {
+            background-color: #ccc;
+        }
+
+        @media (max-width: 600px) {
+            table {
+                overflow-x: auto;
+                transform: scale(0.95);
+                transform-origin: top left;
+            }
+
+            th, td {
+                padding: 4px;
+            }
+        }
+
+        .predicted-graduation {
+            background-color: #ffffff;
+            color: #000000;
+            padding: 10px;
+            border-radius: 4px;
+            text-align: right;
+            margin-top: 20px;
+            width: fit-content;
+            margin-left: auto;
+            margin-right: 50px;
+            border: 1px solid black;
+        }
+
+        .print-button {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            padding: 10px 20px;
+            background-color: #ffffff;
+            color: #000000;
+            border: 1px solid #000000;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+
+        .print-button:hover {
+            background-color: #ccc;
+        }
+
+        @media print {
+            body {
+                background-color: gray;
+            }
+
+            .container {
+                padding: 20px;
+                color: white;
+            }
+
+            .print-button, .semester-selector-container, .navigation-button-container, #reminderSemester4, #newSchedule4 {
+                display: none;
+            }
+
+            .biodata, table, .predicted-graduation {
+                display: block;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <div class="biodata">
+            <h1>Biodata of Student</h1>
+            <h2 id="fullName">Name: [Full Name]</h2>
+            <h2 id="matric">No Matric: [No Matric]</h2>
+            <h2 id="course">Course: [Course]</h2>
+            <h2 id="codeCourse">Code Course: [Code Course]</h2>
+            <h2 id="year">Current Year: [Year]</h2>
+            <h2 id="semester">Current Semester: [Semester]</h2>
+        </div>
+
+        <div class="semester-selector-container">
+            <div class="semester-selector-box">
+                <h2 id="semesterSelector">Semester 4</h2>
+            </div>
+        </div>
+
+        <div class="navigation-button-container">
+            <button id="editResult" class="navigation-button">Edit Result</button>
+            <button id="previousResult" class="navigation-button">Previous Result</button>
+            <button id="logoutButton" class="navigation-button">Logout</button>
+        </div>
+
+        <div>
+            <table>
+                <tr>
+                    <th>Code Subject</th>
+                    <th>Name of Subject</th>
+                    <th>Credit Hour</th>
+                    <th>Subject Mark</th>
+                    <th>Result (Pass/Fail)</th>
+                </tr>
+
+                <!-- Dynamic rows will be inserted here -->
+
+            </table>
+
+            <div id="reminderSemester4" style="margin-top: 20px; padding: 10px; background-color: #ffcccc; color: #ff0000; width: 90%; margin-left: auto; margin-right: auto;">
+                <h3>Reminder</h3>
+                <ul id="failSubjectsSemester4"></ul>
+            </div>
+
+            <div id="newSchedule4" style="margin-top: 20px; padding: 10px; background-color: #ffffff; color: #000000; width: 90%; margin-left: auto; margin-right: auto;">
+            </div>
+        </div>
+
+        <div id="predictedGraduationDate" class="predicted-graduation"></div>
+    </div>
+
+    <button id="printButton" class="print-button">Print</button>
+
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-app.js";
+        import { getDatabase, ref, get, child } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-database.js";
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyDyXr6XMGjgv8XG1U0Owly-PWvAQE7wZY4",
+            authDomain: "academic-student-a62c6.firebaseapp.com",
+            databaseURL: "https://academic-student-a62c6-default-rtdb.asia-southeast1.firebasedatabase.app",
+            projectId: "academic-student-a62c6",
+            storageBucket: "academic-student-a62c6.appspot.com",
+            messagingSenderId: "336896456108",
+            appId: "1:336896456108:web:fb112db2f114afc33d7609",
+            measurementId: "G-TENKLEKM50"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const database = getDatabase(app);
+
+        const urlParams = new URLSearchParams(window.location.search);
+        const username = urlParams.get('username');
+        const password = urlParams.get('password');
+
+        async function getUserData(username, password) {
+        const dbRef = ref(database);
+        console.log('Fetching data for all users');
+        const snapshot = await get(child(dbRef, 'users'));
+        if (snapshot.exists()) {
+            const users = snapshot.val();
+            for (const [userId, userData] of Object.entries(users)) {
+                if (userData.username === username && userData.password === password) {
+                    console.log(`User found: ${username}`);
+                    return userData;
+                }
+            }
+            console.log("Invalid username or password");
+            return null;
+        } else {
+            console.log("No data available");
+            return null;
+        }
+    }
+
+        function determineResult(grade) {
+            const gradeMapping = {
+                "A": 4.00,
+                "A-": 3.75,
+                "B+": 3.50,
+                "B": 3.00,
+                "B-": 2.75,
+                "C+": 2.50,
+                "C": 2.00,
+                "C-": 1.75,
+                "D+": 1.50,
+                "D": 1.00,
+                "D-": 0.75,
+                "F": 0.00
+            };
+            return gradeMapping[grade] >= 1.5? 'Pass' : 'Fail';
+        }
+
+        function getGpaPoints(grade) {
+            const gradeMapping = {
+                "A": 4.00,
+                "A-": 3.75,
+                "B+": 3.50,
+                "B": 3.00,
+                "B-": 2.75,
+                "C+": 2.50,
+                "C": 2.00,
+                "C-": 1.75,
+                "D+": 1.50,
+                "D": 1.00,
+                "D-": 0.75,
+                "F": 0.00
+            };
+            return gradeMapping[grade];
+        }
+
+        const version4Subjects = {
+    "ekt124": "ekt124_v4",
+    "ekt103": "ekt103_v4",
+    "ekt119": "ekt119_v4",
+    "eqt102": "eqt102_v4",
+    "ekt104": "ekt104_v4"
+};
+
+        const version2Subjects = {
+    "ekt124": "ekt124_v2",
+    "ekt103": "ekt103_v2",
+    "ekt119": "ekt119_v2",
+    "eqt102": "eqt102_v2",
+    "ekt104": "ekt104_v2"
+};
+
+const subjectMapping = {
+    "ekt124_v2": "EKT124 - ELEKTRONIK DIGIT I [DIGITAL ELECTRONICS I]",
+    "ekt103_v2": "EKT103 - KEJURUTERAAN ELEKTRIK [ELECTRICAL ENGINEERING] ",
+    "ekt119_v2": "EKT119 - LITAR ELEKTRIK II [ELECTRIC CIRCUIT II]",
+    "eqt102_v2": "EQT102 - MATEMATIK KEJURUTERAAN II [ENGINEERING MATHEMATICS II]",
+    "ekt104_v2": "EKT104 - LITAR ELEKTRONIK ANALOG I [ANALOG ELECTRONIC CIRCUITS I]",
+    "ekt124_v4": "EKT124 - ELEKTRONIK DIGIT I [DIGITAL ELECTRONICS I]",
+    "ekt103_v4": "EKT103 - KEJURUTERAAN ELEKTRIK [ELECTRICAL ENGINEERING] ",
+    "ekt119_v4": "EKT119 - LITAR ELEKTRIK II [ELECTRIC CIRCUIT II]",
+    "eqt102_v4": "EQT102 - MATEMATIK KEJURUTERAAN II [ENGINEERING MATHEMATICS II]",
+    "ekt104_v4": "EKT104 - LITAR ELEKTRONIK ANALOG I [ANALOG ELECTRONIC CIRCUITS I]"
+};
+
+        document.addEventListener('DOMContentLoaded', async function () {
+            const failSubjectsSemester4List = [];
+            const userData = await getUserData(username, password);
+            if (userData) {
+
+                // Update biodata fields
+                document.getElementById('fullName').textContent = `Name: ${userData.fullname}`;
+                document.getElementById('matric').textContent = `No Matric: ${userData.matrik}`;
+                document.getElementById('course').textContent = `Course: ${userData.Course}`;
+                document.getElementById('codeCourse').textContent = `Code Course: ${userData.Code}`;
+                document.getElementById('year').textContent = `Current Year: ${userData.Year}`;
+                document.getElementById('semester').textContent = `Current Semester: ${userData.Semester}`;
+
+                let totalCreditHours = 0;
+                let totalGpaPoints = 0;
+                let tableRows = '';
+
+                const subjectsSemester4WithFailed = JSON.parse(sessionStorage.getItem('subjectsSemester4WithFailed')) || [];
+const selectedSubjectsSemester4 = JSON.parse(sessionStorage.getItem('selectedSubjectsSemester4')) || [];
+
+// Debug: Print selected subjects
+console.log('Selected Subjects:', selectedSubjectsSemester4);
+
+// Track latest version of subjects
+let latestSubjects = {};
+
+// Check if the subject has a grade and display it
+subjectsSemester4WithFailed.forEach((subject) => {
+            const subjectCodeLower = subject.code.toLowerCase();
+            const mappedCodeV2 = version2Subjects[subjectCodeLower] || subjectCodeLower; // Use version 2 if mapped
+            const mappedCodeV4 = version4Subjects[subjectCodeLower] || subjectCodeLower; // Use version 4 if mapped
+            const userSubjectDataV2 = userData.subjects[mappedCodeV2];
+            const userSubjectDataV4 = userData.subjects[mappedCodeV4];
+
+            let userSubjectData = userSubjectDataV2 || userSubjectDataV4; // Prefer V4 if available, otherwise use V2
+            let finalMappedCode = userSubjectDataV4 ? mappedCodeV4 : mappedCodeV2;
+
+            if (userSubjectData && userSubjectData.grade) {
+                const grade = userSubjectData.grade;
+                const result = determineResult(grade);
+                const gpaPoints = getGpaPoints(grade);
+
+                // Determine if this is the latest version
+                const subjectBaseCode = finalMappedCode.split('_v')[0];
+                const subjectVersion = finalMappedCode.includes('_v') ? parseInt(finalMappedCode.split('_v')[1]) : 1;
+
+                if (!latestSubjects[subjectBaseCode] || (latestSubjects[subjectBaseCode].version < subjectVersion)) {
+                    latestSubjects[subjectBaseCode] = { grade, version: subjectVersion, subject, gpaPoints, result };
+                }
+            }
+        });
+
+        // Process the latest version of subjects
+        for (const baseCode in latestSubjects) {
+            const subjectData = latestSubjects[baseCode];
+            const { grade, subject, gpaPoints, result } = subjectData;
+            
+            // Use subjectMapping to get the subject name
+            const subjectFullName = subjectMapping[subject.code.toLowerCase()] || subject.code.toUpperCase();
+
+                        tableRows += `
+                            <tr>
+                                <td>${subject.code.toUpperCase()}</td>
+                                <td>${subject.name}</td>
+                                <td>${subject.creditHour}</td>
+                                <td>${grade}</td>
+                                <td>${result}</td>
+                            </tr>
+                        `;
+
+                        totalCreditHours += subject.creditHour;
+                        totalGpaPoints += gpaPoints * subject.creditHour;
+
+                        if (result === 'Fail') {
+                            failSubjectsSemester4List.push(subject);
+                        }
+                    
+                };
+
+                const CGPA4 = totalGpaPoints / totalCreditHours;
+
+                const CGPA1 = parseFloat(localStorage.getItem('CGPA1'));
+                console.log('CGPA1 from localStorage:', CGPA1);
+
+                const CGPA3 = parseFloat(localStorage.getItem('CGPA3'));
+                console.log('CGPA3 from localStorage:', CGPA3);
+
+                const CGPA2 = parseFloat(localStorage.getItem('CGPA2'));
+                console.log('CGPA2 from localStorage:', CGPA2);
+
+                if (!isNaN(CGPA3)) {
+                    const GPA4 = (CGPA1 + CGPA2 + CGPA3 + CGPA4) / 4;
+
+                    const semesterStatusSemester3 = sessionStorage.getItem('DetectSemester3');
+                    let detectSemester4;
+                    if (semesterStatusSemester3 === 'P1') {
+                        detectSemester4 = (CGPA4 < 2) ? 'P2' : 'Active';
+                    } else {
+                        detectSemester4 = (CGPA4 < 2) ? 'P1' : 'Active';
+                    }
+
+                    document.querySelector('table').insertAdjacentHTML('beforeend', tableRows);
+
+                    const finalRow = `
+                        <tr>
+                            <td id="blankCell"></td>
+                            <td id="GPA4">CGPA: ${GPA4.toFixed(2)}</td>
+                            <td id="total">${totalCreditHours}</td>
+                            <td id="CGPA4">GPA: ${CGPA4.toFixed(2)}</td>
+                            <td id="DetectSemester4">${detectSemester4}</td>
+                        </tr>
+                    `;
+                    document.querySelector('table').insertAdjacentHTML('beforeend', finalRow);
+
+                    sessionStorage.setItem('DetectSemester4', detectSemester4);
+
+                    if (failSubjectsSemester4List.length > 0) {
+                        const reminderMessageSemester4 = `You should retake the following subjects for the next semester:`;
+                        const reminderParagraphSemester4 = document.createElement('p');
+                        reminderParagraphSemester4.innerHTML = reminderMessageSemester4;
+
+                        const failSubjectsList = document.createElement('ul');
+                        failSubjectsSemester4List.forEach(subject => {
+                            const listItem = document.createElement('li');
+                            listItem.textContent = subject.name;
+                            failSubjectsList.appendChild(listItem);
+                        });
+
+                        const reminderDivSemester4 = document.getElementById('reminderSemester4');
+                        reminderDivSemester4.innerHTML = '';
+                        reminderDivSemester4.appendChild(reminderParagraphSemester4);
+                        reminderDivSemester4.appendChild(failSubjectsList);
+                        reminderDivSemester4.style.display = 'block';
+                    } else {
+                        document.getElementById('reminderSemester4').style.display = 'none';
+                    }
+
+                    let totalCreditLecturer = 0;
+                    let totalCreditStudent = 0;
+                    let schedule = '';
+                    let schedule1 = '';
+                    let schedule2 = '';
+
+                    schedule += '<h3>New Schedule For Semester 5</h3>';
+                    schedule += '<p>For the next semester, you need to take the following subjects:</p>';
+                    schedule += '<ul>';
+
+                    const subjectsSemester5 = [
+                        { code: 'SMB31202', name: 'BAHASA INGGERIS UNTUK KOMUNIKASI TEKNIKAL [ENGLISH FOR TECHNICAL COMMUNICATION]', creditHour: 2 },
+                        { code: 'NMJ31403', name: 'PEMPROSESAN ISYARAT DIGITAL [DIGITAL SIGNAL PROCESSING]', creditHour: 3 },
+                        { code: 'NMJ31603', name: 'PENGURUSAN UNTUK JURUTERA [MANAGEMENT FOR ENGINEERS]', creditHour: 3 },
+                        { code: 'NMJ32203', name: 'RANGKAIAN KOMPUTER [COMPUTER NETWORKS]', creditHour: 3 },
+                        { code: 'NMJ32903', name: 'SISTEM PERHUBUNGAN [COMMUNICATION SYSTEMS]', creditHour: 3 },
+                        { code: 'NMJ30504', name: 'INSTRUMENTASI DAN PENGUKURAN ELEKTRONIK [ELECTRONIC INSTRUMENTATION AND MEASUREMENT]', creditHour: 4 }
+                    ];
+                        
+                    // Retrieve unused subjects from sessionStorage
+                    const unusedSubjects = JSON.parse(sessionStorage.getItem('UnusedSubjectsSemester3')) || [];
+
+                    const failSubjectsSemester3 = JSON.parse(sessionStorage.getItem('failSubjectsSemester3')) || [];
+                    console.log('Retrieved failed subjects for Semester 3:', failSubjectsSemester3);
+    
+                    
+                    const subjectsSemester5WithFailed = [
+                        ...unusedSubjects,
+                        ...failSubjectsSemester3,
+                        ...subjectsSemester5
+                    ];
+
+                    sessionStorage.setItem('subjectsSemester5WithFailed', JSON.stringify(subjectsSemester5WithFailed));
+
+                    schedule += subjectsSemester5WithFailed.map(subject => `<li>${subject.code.toUpperCase()} - ${subject.name} [${subject.creditHour} Kredit]</li>`).join('');
+                    schedule += '</ul>';
+
+                    let creditLimitMessage = '';
+                    if (detectSemester4 === 'P1') {
+                        creditLimitMessage = 'You can choose subjects up to 12 credits.';
+                    } else if (detectSemester4 === 'Active') {
+                        creditLimitMessage = 'You can choose subjects up to 20 credits.';
+                    } else if (detectSemester4 === 'P2') {
+                        creditLimitMessage = 'You can choose subjects up to 10 credits.';
+                    }
+
+                    schedule += `<p>This is all the subjects that you can choose according to your credit. ${creditLimitMessage}</p>`;
+                    console.log('unused Subjects:', unusedSubjects);
+                    console.log('Fail Subjects Sem3:', failSubjectsSemester3);
+                    if (failSubjectsSemester3.length > 0 && unusedSubjects.length > 0 || unusedSubjects.length > 0|| failSubjectsSemester3.length > 0) {
+                    const prioritizedSubjects = ['SMB31202', 'EQT101', 'SMQ22103', 'NMJ31403', 'EKT120', 'NMJ31603', 'NMJ32203', 'NMJ32903', 'NMJ20904', 'NMJ30504', 'EKT102', 'NMJ20404', 'NMJ20003', 'EKT101'];
+                    const prioritizedSubjectsLecturer = ['SMB31202', 'EQT101', 'EKT120', 'EKT102', 'EKT101', 'SMQ22103', 'NMJ20904', 'NMJ20404', 'NMJ20003', 'NMJ31403', 'NMJ31603', 'NMJ32203', 'NMJ32903', 'NMJ30504'];
+
+                    schedule1 += '<h3>Suggested Subjects Ranked by Lecturer</h3>';
+                    schedule1 += '<ol>';
+                    const addedSubjectsLecturer = new Set();
+
+                    for (const subjectCode of prioritizedSubjectsLecturer) {
+                        const subject = subjectsSemester5WithFailed.find(sub => sub.code.toLowerCase() === subjectCode.toLowerCase());
+                        if (subject && !addedSubjectsLecturer.has(subject.code) &&
+                            (
+                                (detectSemester4 === 'P1' && totalCreditLecturer + subject.creditHour <= 12) ||
+                                (detectSemester4 === 'Active' && totalCreditLecturer + subject.creditHour <= 20) ||
+                                (detectSemester4 === 'P2' && totalCreditLecturer + subject.creditHour <= 10)
+                            )
+                        ) {
+                            totalCreditLecturer += subject.creditHour;
+                            addedSubjectsLecturer.add(subject.code);
+                            schedule1 += `<li>${subject.code.toUpperCase()} - ${subject.name} [${subject.creditHour} Kredit]</li>`;
+                        }
+                    }
+                    schedule1 += '</ol>';
+
+                    schedule2 += '<h3>Suggested Subjects Ranked by Students</h3>';
+                    schedule2 += '<ol>';
+                    const addedSubjectsStudent = new Set();
+
+                    for (const subjectCode of prioritizedSubjects) {
+                        const subject = subjectsSemester5WithFailed.find(sub => sub.code.toLowerCase() === subjectCode.toLowerCase());
+                        if (subject && !addedSubjectsStudent.has(subject.code) &&
+                            (
+                                (detectSemester4 === 'P1' && totalCreditStudent + subject.creditHour <= 12) ||
+                                (detectSemester4 === 'Active' && totalCreditStudent + subject.creditHour <= 20) ||
+                                (detectSemester4 === 'P2' && totalCreditStudent + subject.creditHour <= 10)
+                            )
+                        ) {
+                            totalCreditStudent += subject.creditHour;
+                            addedSubjectsStudent.add(subject.code);
+                            schedule2 += `<li>${subject.code.toUpperCase()} - ${subject.name} [${subject.creditHour} Kredit]</li>`;
+                        }
+                    }
+                    schedule2 += '</ol>';
+                    }
+
+                    const newSchedule4 = document.getElementById('newSchedule4');
+                    newSchedule4.innerHTML = schedule;
+
+                    const schedule1Container = document.createElement('div');
+                    schedule1Container.innerHTML = schedule1;
+                    newSchedule4.appendChild(schedule1Container);
+
+                    const schedule2Container = document.createElement('div');
+                    schedule2Container.innerHTML = schedule2;
+                    newSchedule4.appendChild(schedule2Container);
+
+                    sessionStorage.setItem('newSchedule4', schedule);
+                    sessionStorage.setItem('schedule1', schedule1);
+                    sessionStorage.setItem('schedule2', schedule2);
+
+                    const storedSchedule = sessionStorage.getItem('newSchedule4');
+                    if (storedSchedule) {
+                        const newSchedule4Container = document.getElementById('newSchedule4');
+                        newSchedule4Container.innerHTML = storedSchedule;
+                        const schedule1Container = document.createElement('div');
+                        schedule1Container.innerHTML = sessionStorage.getItem('schedule1');
+                        newSchedule4Container.appendChild(schedule1Container);
+                        const schedule2Container = document.createElement('div');
+                        schedule2Container.innerHTML = sessionStorage.getItem('schedule2');
+                        newSchedule4Container.appendChild(schedule2Container);
+                    }
+
+                    let predictedGraduationDate3 = localStorage.getItem('predictedGraduationDate3');
+
+                    let baseGraduationDate;
+                    if (predictedGraduationDate3) {
+                        baseGraduationDate = new Date(predictedGraduationDate3);
+                    } else {
+                        baseGraduationDate = new Date('2024-10-10');
+                    }
+
+                    function formatDate(date) {
+                        const options = { year: 'numeric', month: 'long', day: 'numeric' };
+                        return date.toLocaleDateString('en-GB', options);
+                    }
+
+                    function addMonths(date, months) {
+                        const d = new Date(date);
+                        d.setMonth(d.getMonth() + months);
+                        return d;
+                    }
+
+                    if (detectSemester4 === 'P1') {
+                        baseGraduationDate = addMonths(baseGraduationDate, 6);
+                    } else if (detectSemester4 === 'P2') {
+                        baseGraduationDate = addMonths(baseGraduationDate, 12);
+                    }
+
+                    const formattedGraduationDate = formatDate(baseGraduationDate);
+                    const predictedGraduationDate = document.getElementById('predictedGraduationDate');
+                    predictedGraduationDate.textContent = `Predicted to graduate on ${formattedGraduationDate}`;
+
+                    localStorage.setItem('predictedGraduationDate4', baseGraduationDate.toISOString());
+
+                    document.getElementById('printButton').addEventListener('click', function() {
+                        window.print();
+                    });
+
+                    document.getElementById('logoutButton').addEventListener('click', function () {
+                        window.location.href = 'https://aimanjitra.github.io/firebase2/login2.html';
+                    });
+
+                    document.getElementById('previousResult').addEventListener('click', function () {
+                        const previousPageUrl = `https://aimanjitra.github.io/firebase2/result3.html?username=${username}&password=${password}`;
+                        window.location.href = previousPageUrl;
+                    });
+
+                    document.getElementById('editResult').addEventListener('click', function () {
+                        const editPageUrl = `https://aimanjitra.github.io/firebase2/select4.html?username=${username}&password=${password}`;
+                        window.location.href = editPageUrl;
+                    });
+                } else {
+                    console.error('CGPA3 is not found in sessionStorage');
+                    alert('CGPA3 is not found or is invalid. Please ensure you have completed Semester 3 and try again.');
+                }
+            } else {
+                alert('Invalid username or password');
+            }
+        });
+    </script>
+</body>
+
+</html>

@@ -1,0 +1,664 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="styles.css">
+    <title>Peribadi Pelajar UniMAP</title>
+    <style>
+        body,
+        html {
+            margin: 0;
+            padding: 0;
+            height: 100%;
+            background-image: url('minimal-abstract-dark-blue-gradient-banner-background-design-photo.jpg');
+            background-size: cover; /* Ensures the background covers the entire screen */
+            background-repeat: no-repeat; /* Prevents the background from repeating */
+            background-attachment: fixed; /* Makes the background fixed during scrolling */
+        }
+
+        .container {
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            font-family: Arial, sans-serif;
+            color: white;
+            overflow-y: auto;
+        }
+
+        .biodata {
+            padding: 20px;
+        }
+
+        h1 {
+            font-size: 24px;
+            text-align: center;
+            margin-bottom: 10px;
+        }
+
+        h2 {
+            font-size: 18px;
+            margin-bottom: 5px;
+        }
+
+        h3 {
+            font-size: 18px;
+            margin-top: 0px;
+            margin-left: 10px;
+            margin-right: auto;
+            background-color: rgb(180, 172, 172);
+            color: black;
+            padding: 10px;
+        }
+
+        table {
+            width: 90%;
+            border-collapse: collapse;
+            margin-top: 0px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        th,
+        td {
+            border: 1px solid black;
+            padding: 8px;
+            text-align: left;
+        }
+
+        th {
+            background-color: white;
+            color: black;
+        }
+
+        td {
+            background-color: white;
+            color: black;
+        }
+
+        #GPA2 {
+            text-align: right;
+            position: relative;
+            padding-right: 20px;
+        }
+
+        #GPA2::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            bottom: 0;
+            left: 0;
+            width: 25%;
+            background-color: rgb(180, 172, 172);
+            margin: auto;
+        }
+
+        #blankCell {
+            background-color: rgb(180, 172, 172);
+        }
+
+        .semester-selector-container {
+            display: flex;
+            justify-content: center;
+            margin-top: 20px;
+        }
+
+        .semester-selector-box {
+            display: inline-block;
+            padding: 4px 8px;
+            border-radius: 4px;
+            cursor: pointer;
+            margin-right: 10px;
+        }
+
+        .navigation-button-container {
+            display: flex;
+            justify-content: center;
+            margin-top: 20px;
+            margin-bottom: 20px;
+        }
+
+        .navigation-button {
+            display: inline-block;
+            padding: 4px 8px;
+            border: 1px solid black;
+            border-radius: 4px;
+            cursor: pointer;
+            background-color: white;
+            color: black;
+            margin-right: 10px;
+            width: 100px;
+            text-align: center;
+        }
+
+        .navigation-button:hover {
+            background-color: #ccc;
+        }
+
+        @media (max-width: 600px) {
+            table {
+                overflow-x: auto;
+                transform: scale(0.95);
+                transform-origin: top left;
+            }
+
+            th,
+            td {
+                padding: 4px;
+            }
+        }
+
+        .predicted-graduation {
+            background-color: #ffffff;
+            color: #000000;
+            padding: 10px;
+            border-radius: 4px;
+            text-align: right;
+            margin-top: 20px;
+            width: fit-content;
+            margin-left: auto;
+            margin-right: 50px;
+            border: 1px solid black;
+        }
+
+        .print-button {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            padding: 10px 20px;
+            background-color: #ffffff;
+            color: #000000;
+            border: 1px solid #000000;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+
+        .print-button:hover {
+            background-color: #ccc;
+        }
+
+        @media print {
+            body {
+                background-color: gray;
+            }
+
+            .container {
+                padding: 20px;
+                color: white;
+            }
+
+            .print-button,
+            .semester-selector-container,
+            .navigation-button-container,
+            #reminderSemester2,
+            #newSchedule2 {
+                display: none;
+            }
+
+            .biodata,
+            table,
+            .predicted-graduation {
+                display: block;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <div class="biodata">
+            <h1>Biodata of Student</h1>
+            <h2 id="fullName">Name: [Full Name]</h2>
+            <h2 id="matric">No Matric: [No Matric]</h2>
+            <h2 id="course">Course: [Course]</h2>
+            <h2 id="codeCourse">Code Course: [Code Course]</h2>
+            <h2 id="year">Current Year: [Year]</h2>
+            <h2 id="semester">Current Semester: [Semester]</h2>
+        </div>
+        
+        <div class="semester-selector-container">
+            <div class="semester-selector-box">
+                <h2 id="semesterSelector">Semester 2</h2>
+            </div>
+        </div>        
+        <div class="navigation-button-container">
+            <button id="previousResult" class="navigation-button">Previous Selection</button>
+            <button id="nextSemester" class="navigation-button">Next Semester</button>
+            <button id="logoutButton" class="navigation-button">Logout</button>
+        </div>
+        
+        <div>
+            <table>
+                <tr>
+                    <th>Code Subject</th>
+                    <th>Name of Subject</th>
+                    <th>Credit Hour</th>
+                    <th>Subject Mark</th>
+                    <th>Result (Pass/Fail)</th>
+                </tr>
+        
+                <!-- Dynamic rows will be inserted here -->
+        
+            </table>
+
+            <div id="reminderSemester2" style="margin-top: 20px; padding: 10px; background-color: #ffcccc; color: #ff0000; width: 90%; margin-left: auto; margin-right: auto;">
+                <h3>Reminder</h3>
+                <ul id="failSubjectsSemester2"></ul>
+            </div>
+
+            <div id="newSchedule2" style="margin-top: 20px; padding: 10px; background-color: #ffffff; color: #000000; width: 90%; margin-left: auto; margin-right: auto;">
+            </div>
+        </div>
+
+        <div id="predictedGraduationDate" class="predicted-graduation"></div>
+    </div>
+
+    <button id="printButton" class="print-button">Print</button>
+
+    <script type="module">
+        // Import the functions you need from the SDKs you need
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-app.js";
+        import { getDatabase, ref, get, child } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-database.js";
+
+        // Your web app's Firebase configuration
+        const firebaseConfig = {
+            apiKey: "AIzaSyDyXr6XMGjgv8XG1U0Owly-PWvAQE7wZY4",
+            authDomain: "academic-student-a62c6.firebaseapp.com",
+            databaseURL: "https://academic-student-a62c6-default-rtdb.asia-southeast1.firebasedatabase.app",
+            projectId: "academic-student-a62c6",
+            storageBucket: "academic-student-a62c6.appspot.com",
+            messagingSenderId: "336896456108",
+            appId: "1:336896456108:web:fb112db2f114afc33d7609",
+            measurementId: "G-TENKLEKM50"
+        };
+
+        // Initialize Firebase
+        const app = initializeApp(firebaseConfig);
+        const database = getDatabase(app);
+
+        // Mapping subject codes to full subject names
+        const subjectsSemester2 = [
+            { code: 'UZW195', name: 'RADIO KAMPUS [CAMPUS RADIO]', creditHour: 3 },
+            { code: 'EKT124', name: 'ELEKTRONIK DIGIT I [DIGITAL ELECTRONICS I]', creditHour: 3 },
+            { code: 'EKT103', name: 'KEJURUTERAAN ELEKTRIK [ELECTRICAL ENGINEERING]', creditHour: 3 },
+            { code: 'EKT119', name: 'LITAR ELEKTRIK II [ELECTRIC CIRCUIT II]', creditHour: 3 },
+            { code: 'EQT102', name: 'MATEMATIK KEJURUTERAAN II [ENGINEERING MATHEMATICS II]', creditHour: 3 },
+            { code: 'EKT104', name: 'LITAR ELEKTRONIK ANALOG 1 [ANALOG ELECTRONIC CIRCUITS 1]', creditHour: 3 }
+        ];
+
+        // Prioritized subjects
+        const prioritizedSubjects = ['SMB20102', 'EQT101', 'SMQ22103', 'EKT120', 'NMJ20904', 'EKT102', 'NMJ20404', 'NMJ20003', 'EKT101'];
+        const prioritizedSubjectsLecturer = ['SMB20102', 'EQT101', 'EKT101', 'EKT102', 'EKT120', 'SMQ22103', 'NMJ20904', 'NMJ20404', 'NMJ20003'];
+
+        // Retrieve URL parameters
+        const urlParams = new URLSearchParams(window.location.search);
+        const username = urlParams.get('username');
+        const password = urlParams.get('password');
+
+        async function getUserData(username, password) {
+        const dbRef = ref(database);
+        console.log('Fetching data for all users');
+        const snapshot = await get(child(dbRef, 'users'));
+        if (snapshot.exists()) {
+            const users = snapshot.val();
+            for (const [userId, userData] of Object.entries(users)) {
+                if (userData.username === username && userData.password === password) {
+                    console.log(`User found: ${username}`);
+                    return userData;
+                }
+            }
+            console.log("Invalid username or password");
+            return null;
+        } else {
+            console.log("No data available");
+            return null;
+        }
+    }
+
+        // Function to determine pass/fail result
+        function determineResult(grade) {
+            const gradeMapping = {
+                "A": 4.00,
+                "A-": 3.75,
+                "B+": 3.50,
+                "B": 3.00,
+                "B-": 2.75,
+                "C+": 2.50,
+                "C": 2.00,
+                "C-": 1.75,
+                "D+": 1.50,
+                "D": 1.00,
+                "D-": 0.75,
+                "F": 0.00
+            };
+            return gradeMapping[grade] >= 1.5 ? 'Pass' : 'Fail';
+        }
+
+        // Function to get GPA points
+        function getGpaPoints(grade) {
+            const gradeMapping = {
+                "A": 4.00,
+                "A-": 3.75,
+                "B+": 3.50,
+                "B": 3.00,
+                "B-": 2.75,
+                "C+": 2.50,
+                "C": 2.00,
+                "C-": 1.75,
+                "D+": 1.50,
+                "D": 1.00,
+                "D-": 0.75,
+                "F": 0.00
+            };
+            return gradeMapping[grade];
+        }
+
+        document.addEventListener('DOMContentLoaded', async function () {
+            const failSubjectsSemester2 = [];
+            const userData = await getUserData(username, password);
+            if (userData) {
+                
+                // Update biodata fields
+                document.getElementById('fullName').textContent = `Name: ${userData.fullname}`;
+                document.getElementById('matric').textContent = `No Matric: ${userData.matrik}`;
+                document.getElementById('course').textContent = `Course: ${userData.Course}`;
+                document.getElementById('codeCourse').textContent = `Code Course: ${userData.Code}`;
+                document.getElementById('year').textContent = `Current Year: ${userData.Year}`;
+                document.getElementById('semester').textContent = `Current Semester: ${userData.Semester}`;
+
+                let totalCreditHours = 0;
+                let totalGpaPoints = 0;
+                let tableRows = '';
+
+                // Check if the subject has a grade and display it
+                subjectsSemester2.forEach((subject, index) => {
+                    const userSubjectData = userData.subjects[subject.code.toLowerCase()];
+                    if (userSubjectData && userSubjectData.grade) {
+                        const grade = userSubjectData.grade;
+                        const result = determineResult(grade);
+                        const gpaPoints = getGpaPoints(grade);
+
+                        tableRows += `
+                            <tr>
+                                <td>${subject.code}</td>
+                                <td>${subject.name}</td>
+                                <td>${subject.creditHour}</td>
+                                <td>${grade}</td>
+                                <td>${result}</td>
+                            </tr>
+                        `;
+
+                        totalCreditHours += subject.creditHour;
+                        totalGpaPoints += gpaPoints * subject.creditHour;
+
+                        if (result === 'Fail') {
+                            failSubjectsSemester2.push(subject);
+                        }
+                    }
+                });
+
+                // Calculate CGPA for Semester 2
+                const CGPA2 = totalGpaPoints / totalCreditHours;
+
+                // Store CGPA1 in local storage
+                localStorage.setItem('CGPA2', CGPA2);
+                console.log('CGPA2 stored in localStorage:', CGPA2);  // Debug statement 
+
+                // Retrieve CGPA1 from localStorage
+                const CGPA1 = parseFloat(localStorage.getItem('CGPA1'));
+                console.log('CGPA1 from localStorage:', CGPA1);  // Debug statement
+
+                if (!isNaN(CGPA1)) {
+                    // Calculate GPA2 using both CGPA1 and CGPA2
+                    const GPA2 = (CGPA1 + CGPA2) / 2;
+
+                    // Apply the stipulation for Semester 2
+                    const semesterStatusSemester1 = sessionStorage.getItem('DetectSemester1');
+                    let detectSemester2;
+                    if (semesterStatusSemester1 === 'P1') {
+                        detectSemester2 = (GPA2 < 2) ? 'P2' : 'Active';
+                    } else {
+                        detectSemester2 = (GPA2 < 2) ? 'P1' : 'Active';
+                    }
+
+                    document.querySelector('table').insertAdjacentHTML('beforeend', tableRows);
+
+                    // Add the final row to the table
+                    const finalRow = `
+                        <tr>
+                            <td id="blankCell"></td>
+                            <td id="GPA2">CGPA: ${GPA2.toFixed(2)}</td>
+                            <td id="total">${totalCreditHours}</td>
+                            <td id="CGPA2">GPA: ${CGPA2.toFixed(2)}</td>
+                            <td id="DetectSemester2">${detectSemester2}</td>
+                        </tr>
+                    `;
+                    document.querySelector('table').insertAdjacentHTML('beforeend', finalRow);
+
+                    sessionStorage.setItem('DetectSemester2', detectSemester2);
+
+                    if (failSubjectsSemester2.length > 0) {
+                        const reminderMessageSemester2 = `You should retake the following subjects for the next semester:`;
+                        const reminderParagraphSemester2 = document.createElement('p');
+                        reminderParagraphSemester2.innerHTML = reminderMessageSemester2;
+
+                        const failSubjectsList = document.createElement('ul');
+                        failSubjectsSemester2.forEach(subject => {
+                            const listItem = document.createElement('li');
+                            listItem.textContent = subject.name;
+                            failSubjectsList.appendChild(listItem);
+                        });
+
+                        const reminderDivSemester2 = document.getElementById('reminderSemester2');
+                        reminderDivSemester2.innerHTML = ''; // Clear previous content
+                        reminderDivSemester2.appendChild(reminderParagraphSemester2);
+                        reminderDivSemester2.appendChild(failSubjectsList);
+                        reminderDivSemester2.style.display = 'block';
+                    } else {
+                        document.getElementById('reminderSemester2').style.display = 'none';
+                    }
+
+                    sessionStorage.setItem('failSubjectsSemester2', JSON.stringify(failSubjectsSemester2));
+
+                    // Initialize variables for schedules
+                    let totalCreditLecturer = 0;
+                    let totalCreditStudent = 0;
+                    let schedule = '';
+                    let schedule1 = '';
+                    let schedule2 = '';
+
+                    // Display a header for Semester 3 schedule
+                    schedule += '<h3>New Schedule For Semester 3</h3>';
+                    schedule += '<p>For the next semester, you need to take the following subjects:</p>';
+                    schedule += '<ul>';
+
+                    // Combine failed subjects from Semester 1 and Semester 2 with subjects for Semester 3
+                    const subjectsSemester3 = [
+                        { code: 'SMB20102', name: 'BAHASA INGGERIS UNTUK KOMUNIKASI UMUM [ENGLISH FOR GENERAL COMMUNICATION] 2', creditHour: 2 },
+                        { code: 'NMJ20003', name: 'ALGORITHMA DAN STRUKTUR-STRUKTUR DATA [ALGORITHM AND DATA STRUCTURES]', creditHour: 3 },
+                        { code: 'SMQ22103', name: 'MATEMATIK DISKRIT & LINEAR ALGEBRA [DISCRETE MATHEMATICS & LINEAR ALGEBRA]', creditHour: 3 },
+                        { code: 'NMJ20404', name: 'ELEKTRONIK DIGIT II [DIGITAL ELECTRONICS II]', creditHour: 4 },
+                        { code: 'NMJ20904', name: 'LITAR ELEKTRONIK ANALOG II [ANALOG ELECTRONIC CIRCUIT II]', creditHour: 4 }
+                    ];
+                    
+                    const failSubjectsSemester1 = JSON.parse(sessionStorage.getItem('failSubjectsSemester1')) || [];
+
+                    const subjectsSemester3WithFailed = [
+                        ...failSubjectsSemester1,
+                        ...subjectsSemester3
+                    ];
+
+                    const addedSubjects = new Set();
+
+                    // Store subjectsSemester3WithFailed in sessionStorage
+                    sessionStorage.setItem('subjectsSemester3WithFailed', JSON.stringify(subjectsSemester3WithFailed));
+
+                    schedule += subjectsSemester3WithFailed.map(subject => `<li>${subject.code} - ${subject.name} [${subject.creditHour} Kredit]</li>`).join('');
+                    schedule += '</ul>';
+
+                    let creditLimitMessage = '';
+                    if (detectSemester2 === 'P1') {
+                        creditLimitMessage = 'You can choose subjects up to 12 credits.';
+                    } else if (detectSemester2 === 'Active') {
+                        creditLimitMessage = 'You can choose subjects up to 20 credits.';
+                    } else if (detectSemester2 === 'P2') {
+                        creditLimitMessage = 'You can choose subjects up to 10 credits.';
+                    }
+
+                    schedule += `<p>This is all the subjects that you can choose according to your credit. ${creditLimitMessage}</p>`;
+
+                    if (failSubjectsSemester1.length > 0) {
+                    // Suggested subjects recommended by lecturers
+                    schedule1 += '<h3>Suggested Subjects Ranked by Lecturer</h3>';
+                    schedule1 += '<ol>';
+                    const addedSubjectsLecturer = new Set();
+
+                    const firstPrioritySubjectLecturer = subjectsSemester3.find(subject => subject.code === 'SMB20102');
+                    if (firstPrioritySubjectLecturer) {
+                        totalCreditLecturer += firstPrioritySubjectLecturer.creditHour;
+                        addedSubjectsLecturer.add(firstPrioritySubjectLecturer.code);
+                        schedule1 += `<li>${firstPrioritySubjectLecturer.code} - ${firstPrioritySubjectLecturer.name} [${firstPrioritySubjectLecturer.creditHour} Kredit]</li>`;
+                    }
+
+                    for (const subjectCode of prioritizedSubjectsLecturer) {
+                        const subject = subjectsSemester3WithFailed.find(sub => sub.code === subjectCode);
+                        if (subject && !addedSubjectsLecturer.has(subject.code) &&
+                            (
+                                (detectSemester2 === 'P1' && totalCreditLecturer + subject.creditHour <= 12) ||
+                                (detectSemester2 === 'Active' && totalCreditLecturer + subject.creditHour <= 20) ||
+                                (detectSemester2 === 'P2' && totalCreditLecturer + subject.creditHour <= 10)
+                            )
+                        ) {
+                            totalCreditLecturer += subject.creditHour;
+                            addedSubjectsLecturer.add(subject.code);
+                            schedule1 += `<li>${subject.code} - ${subject.name} [${subject.creditHour} Kredit]</li>`;
+                        }
+                    }
+                    schedule1 += '</ol>';
+
+                    // Suggested subjects recommended by students
+                    schedule2 += '<h3>Suggested Subjects Ranked by Students</h3>';
+                    schedule2 += '<ol>';
+                    const addedSubjectsStudent = new Set();
+
+                    const firstPrioritySubjectStudent = subjectsSemester3.find(subject => subject.code === 'SMB20102');
+                    if (firstPrioritySubjectStudent) {
+                        totalCreditStudent += firstPrioritySubjectStudent.creditHour;
+                        addedSubjectsStudent.add(firstPrioritySubjectStudent.code);
+                        schedule2 += `<li>${firstPrioritySubjectStudent.code} - ${firstPrioritySubjectStudent.name} [${firstPrioritySubjectStudent.creditHour} Kredit]</li>`;
+                    }
+
+                    for (const subjectCode of prioritizedSubjects) {
+                        const subject = subjectsSemester3WithFailed.find(sub => sub.code === subjectCode);
+                        if (subject && !addedSubjectsStudent.has(subject.code) &&
+                            (
+                                (detectSemester2 === 'P1' && totalCreditStudent + subject.creditHour <= 12) ||
+                                (detectSemester2 === 'Active' && totalCreditStudent + subject.creditHour <= 20) ||
+                                (detectSemester2 === 'P2' && totalCreditStudent + subject.creditHour <= 10)
+                            )
+                        ) {
+                            totalCreditStudent += subject.creditHour;
+                            addedSubjectsStudent.add(subject.code);
+                            schedule2 += `<li>${subject.code} - ${subject.name} [${subject.creditHour} Kredit]</li>`;
+                        }
+                    }
+                    schedule2 += '</ol>';
+                    }
+
+                    const newSchedule2 = document.getElementById('newSchedule2');
+                    newSchedule2.innerHTML = schedule;
+
+                    const schedule1Container = document.createElement('div');
+                    schedule1Container.innerHTML = schedule1;
+                    newSchedule2.appendChild(schedule1Container);
+
+                    const schedule2Container = document.createElement('div');
+                    schedule2Container.innerHTML = schedule2;
+                    newSchedule2.appendChild(schedule2Container);
+
+                    // Store the new schedule in sessionStorage
+                    sessionStorage.setItem('newSchedule2', schedule);
+                    sessionStorage.setItem('schedule1', schedule1);
+                    sessionStorage.setItem('schedule2', schedule2);
+
+                    // Display the stored schedule if it exists
+                    const storedSchedule = sessionStorage.getItem('newSchedule2');
+                    if (storedSchedule) {
+                        const newSchedule2Container = document.getElementById('newSchedule2');
+                        newSchedule2Container.innerHTML = storedSchedule;
+                        const schedule1Container = document.createElement('div');
+                        schedule1Container.innerHTML = sessionStorage.getItem('schedule1');
+                        newSchedule2Container.appendChild(schedule1Container);
+                        const schedule2Container = document.createElement('div');
+                        schedule2Container.innerHTML = sessionStorage.getItem('schedule2');
+                        newSchedule2Container.appendChild(schedule2Container);
+                    }
+
+                    // Retrieve the previously stored predicted graduation date
+                    let predictedGraduationDate1 = localStorage.getItem('predictedGraduationDate1');
+
+                    let baseGraduationDate;
+                    if (predictedGraduationDate1) {
+                        baseGraduationDate = new Date(predictedGraduationDate1);
+                    } else {
+                        baseGraduationDate = new Date('2024-10-10');
+                    }
+
+                    function formatDate(date) {
+                        const options = { year: 'numeric', month: 'long', day: 'numeric' };
+                        return date.toLocaleDateString('en-GB', options);
+                    }
+
+                    function addMonths(date, months) {
+                        const d = new Date(date);
+                        d.setMonth(d.getMonth() + months);
+                        return d;
+                    }
+
+                    if (detectSemester2 === 'P1') {
+                        baseGraduationDate = addMonths(baseGraduationDate, 6);
+                    } else if (detectSemester2 === 'P2') {
+                        baseGraduationDate = addMonths(baseGraduationDate, 12);
+                    }
+
+                    const formattedGraduationDate = formatDate(baseGraduationDate);
+                    const predictedGraduationDate = document.getElementById('predictedGraduationDate');
+                    predictedGraduationDate.textContent = `Predicted to graduate on ${formattedGraduationDate}`;
+
+                    localStorage.setItem('predictedGraduationDate2', baseGraduationDate.toISOString());
+
+                    document.getElementById('printButton').addEventListener('click', function() {
+                        window.print();
+                    });
+
+                    document.getElementById('logoutButton').addEventListener('click', function () {
+                        window.location.href = 'https://aimanjitra.github.io/firebase2/login2.html';
+                    });
+
+                    document.getElementById('nextSemester').addEventListener('click', function () {
+                        const nextPageUrl = `https://aimanjitra.github.io/firebase2/result3.html?username=${username}&password=${password}`;
+                        window.location.href = nextPageUrl;
+                    });
+
+                    document.getElementById('previousResult').addEventListener('click', function () {
+                        const previousPageUrl = `https://aimanjitra.github.io/firebase2/result1.html?username=${username}&password=${password}`;
+                        window.location.href = previousPageUrl;
+                    });
+
+                   document.getElementById('editResult').addEventListener('click', function () {
+                        const editPageUrl = `https://aimanjitra.github.io/firebase2/select2.html?username=${username}&password=${password}`;
+                        window.location.href = editPageUrl;
+                    });
+                } else {
+                    console.error('CGPA1 is not found in sessionStorage');
+                    alert('CGPA1 is not found or is invalid. Please ensure you have completed Semester 1 and try again.');
+                }
+            } else {
+                alert('Invalid username or password');
+            }
+        });
+    </script>
+</body>
+
+</html>

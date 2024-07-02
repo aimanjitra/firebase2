@@ -122,16 +122,14 @@
             </div>
         </form>
     </div>
-    <a href="https://aimanjitra.github.io/firebase2/login.html">Back to Login</a>
+    <a href="system.html">Back to Login</a>
 
     <!-- Include Firebase SDK -->
     <script type="module">
-        // Import the functions you need from the SDKs you need
         import { initializeApp } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-app.js";
         import { getAnalytics } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-analytics.js";
         import { getDatabase, ref, get, set, child } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-database.js";
 
-        // Your web app's Firebase configuration
         const firebaseConfig = {
             apiKey: "AIzaSyDyXr6XMGjgv8XG1U0Owly-PWvAQE7wZY4",
             authDomain: "academic-student-a62c6.firebaseapp.com",
@@ -143,67 +141,131 @@
             measurementId: "G-TENKLEKM50"
         };
 
-        // Initialize Firebase
         const app = initializeApp(firebaseConfig);
         const analytics = getAnalytics(app);
         const database = getDatabase(app);
 
-        // Function to go to the next step
         window.nextStep = function() {
             const fullName = document.getElementById('fullName').value;
             const matricNumber = document.getElementById('matricNumber').value;
-            if (fullName && matricNumber) {
-                document.getElementById('step1').style.display = 'none';
-                document.getElementById('step2').style.display = 'block';
+            console.log('Next Step - Full Name:', fullName); // Debugging log
+            console.log('Next Step - Matric Number:', matricNumber); // Debugging log
+            
+            // Matric number format validation
+            const matricNumberPattern = /^201021\d{3}$/;
+            if (!matricNumberPattern.test(matricNumber)) {
+                console.log('Matric number validation failed'); // Debugging log
+                alert('Matric number must start with "201021" and be exactly 9 digits long.');
+                return;
             } else {
-                alert('Please fill in all fields.');
+                console.log('Matric number validation passed'); // Debugging log
             }
-        }
 
-        // Function to create a new user
-        window.createUser = function(fullName, matricNumber, username, password) {
-            const usersRef = ref(database, 'users');
-            get(usersRef).then((snapshot) => {
-                if (snapshot.exists()) {
-                    const usersCount = snapshot.size;
-                    const newUserId = 'user' + (usersCount + 1);
-                    const newUserRef = child(usersRef, newUserId);
-
-                    const newUser = {
-                        Code: "UR6523002",
-                        Course: "Computer Engineering",
-                        Semester: 4,
-                        Year: 2,
-                        fullname: fullName,
-                        matric: matricNumber,
-                        password: password,
-                        username: username,
-                        subjects: {}
-                    };
-
-                    set(newUserRef, newUser).then(() => {
-                        alert('User registered successfully!');
-                        window.location.href = 'https://aimanjitra.github.io/firebase2/login.html'; // Redirect to login page
-                    }).catch((error) => {
-                        console.error('Error registering user:', error);
-                    });
+            // Check the matric number first
+            checkFieldExists('matrik', matricNumber).then((matricNumberExists) => {
+                console.log('Matric number check:', matricNumberExists); // Debugging log
+                if (matricNumberExists) {
+                    alert('Matric number is already being used.');
                 } else {
-                    console.log("No users found");
+                    document.getElementById('step1').style.display = 'none';
+                    document.getElementById('step2').style.display = 'block';
                 }
             }).catch((error) => {
-                console.error('Error reading users data:', error);
+                console.error('Error checking matric number:', error);
             });
         }
 
-        // Event listener for register form submission
-        document.getElementById('registerForm').addEventListener('submit', (e) => {
-            e.preventDefault();
-            const fullName = document.getElementById('fullName').value;
-            const matricNumber = document.getElementById('matricNumber').value;
-            const username = document.getElementById('username').value;
-            const password = document.getElementById('password').value;
-            createUser(fullName, matricNumber, username, password);
+        window.createUser = function(fullName, matricNumber, username, password) {
+    // Convert matric number to an integer
+    const matricNumberInt = parseInt(matricNumber, 10);
+
+    // Check the matric number first
+    checkFieldExists('matrik', matricNumberInt).then((matricNumberExists) => {
+        if (matricNumberExists) {
+            alert('Matric number is already being used.');
+        } else {
+            // Check both username and password simultaneously
+            Promise.all([
+                checkFieldExists('username', username),
+                checkFieldExists('password', password)
+            ]).then(([usernameExists, passwordExists]) => {
+                if (usernameExists && passwordExists) {
+                    alert('Username and password are already being used.');
+                } else if (usernameExists) {
+                    alert('Username is already being used.');
+                } else if (passwordExists) {
+                    alert('Password is already being used.');
+                } else {
+                    // Proceed to create the new user
+                    const usersRef = ref(database, 'users');
+                    get(usersRef).then((snapshot) => {
+                        const usersCount = snapshot.exists() ? Object.keys(snapshot.val()).length : 0;
+                        const newUserId = 'user' + (usersCount + 1);
+                        const newUserRef = child(usersRef, newUserId);
+
+                        const newUser = {
+                            Code: "UR6523002",
+                            Course: "Computer Engineering",
+                            Semester: 4,
+                            Year: 2,
+                            fullname: fullName,
+                            matrik: matricNumberInt,
+                            password: password,
+                            username: username,
+                            subjects: {}
+                        };
+
+                        set(newUserRef, newUser).then(() => {
+                            alert('User registered successfully!');
+                            window.location.href = 'system.html';
+                        }).catch((error) => {
+                            console.error('Error registering user:', error);
+                        });
+                    }).catch((error) => {
+                        console.error('Error reading users data:', error);
+                    });
+                }
+            }).catch((error) => {
+                console.error('Error checking username and password:', error);
+            });
+        }
+    }).catch((error) => {
+        console.error('Error checking matric number:', error);
+    });
+}
+
+        function checkFieldExists(field, value) {
+    return new Promise((resolve, reject) => {
+        const usersRef = ref(database, 'users');
+        get(usersRef).then((snapshot) => {
+            if (snapshot.exists()) {
+                const users = snapshot.val();
+                for (const userId in users) {
+                    if (String(users[userId][field]).replace(/['"]+/g, '') === String(value).replace(/['"]+/g, '')) {
+                        console.log(`Field ${field} with value ${value} already exists`); // Debugging log
+                        return resolve(true);
+                    }
+                }
+            }
+            console.log(`Field ${field} with value ${value} does not exist`); // Debugging log
+            resolve(false);
+        }).catch((error) => {
+            console.error(`Error checking field ${field}:`, error);
+            reject(error);
         });
+    });
+}
+
+
+document.getElementById('registerForm').addEventListener('submit', (e) => {
+    e.preventDefault();
+    const fullName = document.getElementById('fullName').value;
+    const matricNumber = document.getElementById('matricNumber').value;
+    const username = document.getElementById('username').value;
+    const password = document.getElementById('password').value;
+    createUser(fullName, matricNumber, username, password);
+});
+
     </script>
 </body>
 </html>

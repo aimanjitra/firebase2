@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap">
+    <link rel="stylesheet" href="styles.css">
     <title>Peribadi Pelajar UniMAP</title>
     <style>
         body,
@@ -318,7 +318,7 @@
     <script type="module">
         // Import the functions you need from the SDKs you need
         import { initializeApp } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-app.js";
-        import { getDatabase, ref, get, child } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-database.js";
+        import { getDatabase, ref, get, child, remove } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-database.js";
 
         // Your web app's Firebase configuration
         const firebaseConfig = {
@@ -362,24 +362,25 @@
     const password = urlParams.get('password');
 
     async function getUserData(username, password) {
-        const dbRef = ref(database);
-        console.log('Fetching data for all users');
-        const snapshot = await get(child(dbRef, 'users'));
-        if (snapshot.exists()) {
-            const users = snapshot.val();
-            for (const [userId, userData] of Object.entries(users)) {
-                if (userData.username === username && userData.password === password) {
-                    console.log(`User found: ${username}`);
-                    return userData;
-                }
+    const dbRef = ref(database);
+    console.log('Fetching data for all users');
+    const snapshot = await get(child(dbRef, 'users'));
+    if (snapshot.exists()) {
+        const users = snapshot.val();
+        for (const [userId, userData] of Object.entries(users)) {
+            if (userData.username === username && userData.password === password) {
+                console.log(`User found: ${username}`);
+                return { userId, ...userData };  // Include userId in the returned data
             }
-            console.log("Invalid username or password");
-            return null;
-        } else {
-            console.log("No data available");
-            return null;
         }
+        console.log("Invalid username or password");
+        return null;
+    } else {
+        console.log("No data available");
+        return null;
     }
+}
+
 
         // Function to determine pass/fail result
         function determineResult(grade) {
@@ -419,10 +420,32 @@
             return gradeMapping[grade];
         }
 
+        function handleStipulations(userData, userId) {
+    const passingGrades = ["A", "A-", "B+", "B", "B-", "C+", "C", "C-", "D+"];
+    const subjects = userData.subjects || {};
+    for (const subjectCode in subjects) {
+        if (subjects.hasOwnProperty(subjectCode)) {
+            const grade = subjects[subjectCode].grade;
+            const versionKey = subjectCode + '_v2'; // Construct version key (e.g., ekt102_v2)
+            if (["ekt102", "eqt101", "ekt120", "ekt101"].includes(subjectCode) && passingGrades.includes(grade)) {
+                // Remove from version2 category
+                const version2Ref = ref(database, 'users/' + userId + '/subjects/' + versionKey);
+                remove(version2Ref).then(() => {
+                    console.log(`Subject removed from version2 category: ${versionKey}`);
+                }).catch((error) => {
+                    console.error('Error removing subject from version2 category:', error);
+                });
+            }
+        }
+    }
+}
+
+
         document.addEventListener('DOMContentLoaded', async function () {
             const failSubjectsSemester1 = [];
             const userData = await getUserData(username, password);
             if (userData) {
+                const userId = userData.userId; // Ensure you have userId
 
                 // Update biodata fields
                 document.getElementById('fullName').textContent = `Name: ${userData.fullname}`;
@@ -498,6 +521,9 @@
         } else {
             document.getElementById('reminderSemester1').style.display = 'none';
         }
+
+        // Call handleStipulations here
+        handleStipulations(userData, userId);
 
             } else {
                 alert('Invalid username or password');
@@ -700,8 +726,6 @@
                     const previousPageUrl = `https://aimanjitra.github.io/firebase2/select1.html?username=${username}&password=${password}`;
                     window.location.href = previousPageUrl;
                 });
-
-        });
     </script>
 </body>
 

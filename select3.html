@@ -469,7 +469,7 @@ function checkAllSubjectsSubmitted(userId) {
             document.getElementById('totalCredits').textContent = totalCredits; // Update total credits in the UI
 
             if ((DetectSemester2 === 'P1' && totalCredits >= 8 && totalCredits <= 12) || 
-                (DetectSemester2 === 'Active' && totalCredits >= 16 && totalCredits <= 20) || 
+                (DetectSemester2 === 'Active' && totalCredits >= 10 && totalCredits <= 20) || 
                 (DetectSemester2 === 'P2' && totalCredits >= 8 && totalCredits <= 10)) {
                 document.getElementById('nextPageButton').style.display = 'block';
             } else {

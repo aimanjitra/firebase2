@@ -378,7 +378,7 @@
                     document.getElementById('totalCredits').textContent = totalCredits; // Update total credits in the UI
 
                     if ((DetectSemester1 === 'P1' && totalCredits >= 8 && totalCredits <= 12) ||
-                        (DetectSemester1 === 'Active' && totalCredits >= 17)) {
+                        (DetectSemester1 === 'Active' && totalCredits >= 10)) {
                         console.log('Condition met for displaying Result button'); // Debug statement
                         document.getElementById('nextPageButton').innerHTML = `<button onclick="window.location.href='https://aimanjitra.github.io/firebase2/sem2.html?username=${username}&password=${password}'">Result</button>`;
                         document.getElementById('nextPageButton').style.display = 'block';

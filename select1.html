@@ -12,10 +12,11 @@
             padding: 0;
             height: 100%;
             overflow-y: auto; /* Enable vertical scrolling */
-            background-image: url('minimal-abstract-dark-blue-gradient-banner-background-design-photo.jpg');
+            background-image: url('dark-blue-plain-kskl9bwuubcnb6r3.jpg');
             background-size: cover; /* Ensures the background covers the entire screen */
             background-repeat: no-repeat; /* Prevents the background from repeating */
             background-attachment: fixed; /* Makes the background fixed during scrolling */
+            background-size: cover;
             display: flex;
             flex-direction: column;
             align-items: center;
@@ -133,7 +134,7 @@
         // Import the functions you need from the SDKs you need
         import { initializeApp } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-app.js";
         import { getAnalytics } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-analytics.js";
-        import { getDatabase, ref, get, set, update, child } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-database.js";
+        import { getDatabase, ref, get, set, update, child, remove } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-database.js";
 
         // Your web app's Firebase configuration
         const firebaseConfig = {
@@ -237,7 +238,6 @@
     });
 }
 
-
         // Function to display submitted data on the page
         function displaySubmittedData(subjectCode, grade) {
     // Check if the subject is in Semester 1
@@ -253,7 +253,7 @@
 }
 
 
-        function checkAllSubjectsSubmitted() {
+function checkAllSubjectsSubmitted() {
     const userId = sessionStorage.getItem('userId');
     if (!userId) {
         console.error('No user signed in');
@@ -271,10 +271,11 @@
         const allSubmitted = semester1Subjects.every(subject => submittedSubjects.has(subject));
 
         if (allSubmitted) {
+
             const username = sessionStorage.getItem('username');
             const password = sessionStorage.getItem('password');
             const resultButton = document.getElementById('resultButton');
-            const nextPageUrl = `https://aimanjitra.github.io/firebase2/sem1.html?username=${username}&password=${password}`;
+            const nextPageUrl = `https://aimanjitra.github.io/firebase2/seml.html?username=${username}&password=${password}`;
             resultButton.setAttribute('onclick', `window.location.href='${nextPageUrl}'`);
             document.getElementById('nextPageButton').style.display = 'block';
         } else {
@@ -284,6 +285,7 @@
         console.error('Error checking subjects:', error);
     });
 }
+
 
 
         // Retrieve stored userId from sessionStorage
@@ -305,5 +307,6 @@
             }
         });
     </script>
+    
 </body>
 </html>

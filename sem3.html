@@ -430,9 +430,9 @@ const subjectMapping = {
                     const semesterStatusSemester2 = sessionStorage.getItem('DetectSemester2');
                     let detectSemester3;
                     if (semesterStatusSemester2 === 'P1') {
-                        detectSemester3 = (GPA3 < 2) ? 'P2' : 'Active';
+                        detectSemester3 = (CGPA3 < 2) ? 'P2' : 'Active';
                     } else {
-                        detectSemester3 = (GPA3 < 2) ? 'P1' : 'Active';
+                        detectSemester3 = (CGPA3 < 2) ? 'P1' : 'Active';
                     }
 
                     document.querySelector('table').insertAdjacentHTML('beforeend', tableRows);

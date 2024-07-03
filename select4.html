@@ -13,10 +13,11 @@
             padding: 0;
             height: 100%;
             overflow: auto;
-            background-image: url('minimal-abstract-dark-blue-gradient-banner-background-design-photo.jpg');
+            background-image: url('dark-blue-plain-kskl9bwuubcnb6r3.jpg');
             background-size: cover; /* Ensures the background covers the entire screen */
             background-repeat: no-repeat; /* Prevents the background from repeating */
             background-attachment: fixed; /* Makes the background fixed during scrolling */
+            background-size: cover;
             display: flex;
             flex-direction: column;
             align-items: center;
@@ -343,8 +344,6 @@
 }
 
 
-
-
 function loadSubmittedData(userId) {
     const dbRef = ref(database, 'users/' + userId + '/subjects');
     get(dbRef).then((snapshot) => {
@@ -477,6 +476,12 @@ function checkAllSubjectsSubmitted() {
         console.error('Error checking subjects:', error);
     });
 }
+
+
+
+
+
+
         // Event listener for marks form submission
 document.getElementById('marksForm').addEventListener('submit', (e) => {
     e.preventDefault();

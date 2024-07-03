@@ -495,7 +495,7 @@
                 document.getElementById('CGPA1').textContent = `CGPA: ${GPA1.toFixed(2)}`;
                 document.getElementById('total').textContent = `${totalCreditHours}`;
                 document.getElementById('GPA1').textContent = `GPA: ${GPA1.toFixed(2)}`;
-                document.getElementById('DetectSemester1').textContent = GPA1 >= 2 ? 'Active' : 'P1';
+                document.getElementById('DetectSemester1').textContent = GPA1 > 1.99 ? 'Active' : 'P1';
                 const detectSemesterElement = document.getElementById('DetectSemester1');
                 const detectSemesterText = detectSemesterElement.textContent.trim();
                 sessionStorage.setItem('DetectSemester1', detectSemesterText);

@@ -465,9 +465,9 @@
                     const semesterStatusSemester1 = sessionStorage.getItem('DetectSemester1');
                     let detectSemester2;
                     if (semesterStatusSemester1 === 'P1') {
-                        detectSemester2 = (GPA2 < 2) ? 'P2' : 'Active';
+                        detectSemester2 = (CGPA2 < 2) ? 'P2' : 'Active';
                     } else {
-                        detectSemester2 = (GPA2 < 2) ? 'P1' : 'Active';
+                        detectSemester2 = (CGPA2 < 2) ? 'P1' : 'Active';
                     }
 
                     document.querySelector('table').insertAdjacentHTML('beforeend', tableRows);

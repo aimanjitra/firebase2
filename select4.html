@@ -464,7 +464,7 @@ function checkAllSubjectsSubmitted() {
             }
 
             if ((DetectSemester3 === 'P1' && totalCredits >= 8 && totalCredits <= 12) || 
-                (DetectSemester3 === 'Active' && totalCredits >= 16 && totalCredits <= 20) || 
+                (DetectSemester3 === 'Active' && totalCredits >= 10 && totalCredits <= 20) || 
                 (DetectSemester3 === 'P2' && totalCredits >= 8 && totalCredits <= 10)) {
                 document.getElementById('nextPageButton').innerHTML = `<button onclick="window.location.href='https://aimanjitra.github.io/firebase2/sem4.html?username=${username}&password=${password}'">Result</button>`;
                 document.getElementById('nextPageButton').style.display = 'block';

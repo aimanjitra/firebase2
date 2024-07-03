@@ -12,10 +12,11 @@
             margin: 0;
             padding: 0;
             height: 100%;
-            background-image: url('minimal-abstract-dark-blue-gradient-banner-background-design-photo.jpg');
+            background-image: url('dark-blue-plain-kskl9bwuubcnb6r3.jpg');
             background-size: cover; /* Ensures the background covers the entire screen */
             background-repeat: no-repeat; /* Prevents the background from repeating */
             background-attachment: fixed; /* Makes the background fixed during scrolling */
+            background-size: cover;
         }
 
         .container {
@@ -259,7 +260,7 @@
     <script type="module">
         // Import the functions you need from the SDKs you need
         import { initializeApp } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-app.js";
-        import { getDatabase, ref, get, child } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-database.js";
+        import { getDatabase, ref, get, child, remove } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-database.js";
 
         // Your web app's Firebase configuration
         const firebaseConfig = {
@@ -297,24 +298,24 @@
         const password = urlParams.get('password');
 
         async function getUserData(username, password) {
-        const dbRef = ref(database);
-        console.log('Fetching data for all users');
-        const snapshot = await get(child(dbRef, 'users'));
-        if (snapshot.exists()) {
-            const users = snapshot.val();
-            for (const [userId, userData] of Object.entries(users)) {
-                if (userData.username === username && userData.password === password) {
-                    console.log(`User found: ${username}`);
-                    return userData;
-                }
+    const dbRef = ref(database);
+    console.log('Fetching data for all users');
+    const snapshot = await get(child(dbRef, 'users'));
+    if (snapshot.exists()) {
+        const users = snapshot.val();
+        for (const [userId, userData] of Object.entries(users)) {
+            if (userData.username === username && userData.password === password) {
+                console.log(`User found: ${username}`);
+                return { userId, ...userData };  // Include userId in the returned data
             }
-            console.log("Invalid username or password");
-            return null;
-        } else {
-            console.log("No data available");
-            return null;
         }
+        console.log("Invalid username or password");
+        return null;
+    } else {
+        console.log("No data available");
+        return null;
     }
+}
 
         // Function to determine pass/fail result
         function determineResult(grade) {
@@ -354,11 +355,57 @@
             return gradeMapping[grade];
         }
 
+        async function handleStipulations(userId) {
+    const dbRef = ref(database, 'users/' + userId + '/subjects');
+    const snapshot = await get(dbRef);
+
+    if (snapshot.exists()) {
+        const subjects = snapshot.val();
+        const subjectsToCheck = ["ekt124", "ekt103", "ekt119", "eqt102", "ekt104"];
+
+        for (const subject of subjectsToCheck) {
+            const originalSubject = subjects[subject];
+            const version2Subject = subjects[`${subject}_v2`];
+            const version4Subject = subjects[`${subject}_v4`];
+
+            // Check if the subject is selected and has a passing grade
+            if (originalSubject && !['D', 'D-', 'F'].includes(originalSubject.grade)) {
+                // If the subject is selected and passed, remove both version 2 and version 4
+                if (version2Subject) {
+                    const version2Ref = ref(database, `users/${userId}/subjects/${subject}_v2`);
+                    await remove(version2Ref);
+                    console.log(`Removed ${subject}_v2`);
+                }
+                if (version4Subject) {
+                    const version4Ref = ref(database, `users/${userId}/subjects/${subject}_v4`);
+                    await remove(version4Ref);
+                    console.log(`Removed ${subject}_v4`);
+                }
+            } else if (originalSubject && ['D', 'D-', 'F'].includes(originalSubject.grade)) {
+                // If the subject has a failing grade, remove version 4
+                if (version4Subject) {
+                    const version4Ref = ref(database, `users/${userId}/subjects/${subject}_v4`);
+                    await remove(version4Ref);
+                    console.log(`Removed ${subject}_v4`);
+                }
+            } else {
+                // If the subject is unused (not present), remove only version 2
+                if (version2Subject) {
+                    const version2Ref = ref(database, `users/${userId}/subjects/${subject}_v2`);
+                    await remove(version2Ref);
+                    console.log(`Removed ${subject}_v2`);
+                }
+            }
+        }
+    }
+}
+
+
         document.addEventListener('DOMContentLoaded', async function () {
             const failSubjectsSemester2 = [];
             const userData = await getUserData(username, password);
             if (userData) {
-                
+                const userId = userData.userId; // Ensure you have userId
                 // Update biodata fields
                 document.getElementById('fullName').textContent = `Name: ${userData.fullname}`;
                 document.getElementById('matric').textContent = `No Matric: ${userData.matrik}`;
@@ -459,6 +506,8 @@
                         document.getElementById('reminderSemester2').style.display = 'none';
                     }
 
+                    // Call handleStipulations here
+                    await handleStipulations(userId); // Make sure to await this call
                     sessionStorage.setItem('failSubjectsSemester2', JSON.stringify(failSubjectsSemester2));
 
                     // Initialize variables for schedules
@@ -633,7 +682,7 @@
                     });
 
                     document.getElementById('logoutButton').addEventListener('click', function () {
-                        window.location.href = 'https://aimanjitra.github.io/firebase2/main.html';
+                        window.location.href = 'https://aimanjitra.github.io/firebase/login.html';
                     });
 
                     document.getElementById('nextSemester').addEventListener('click', function () {

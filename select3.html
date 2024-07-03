@@ -13,10 +13,11 @@
             padding: 0;
             height: 100%;
             overflow: auto; /* Enable scrolling on the body */
-            background-image: url('minimal-abstract-dark-blue-gradient-banner-background-design-photo.jpg');
+            background-image: url('dark-blue-plain-kskl9bwuubcnb6r3.jpg');
             background-size: cover; /* Ensures the background covers the entire screen */
             background-repeat: no-repeat; /* Prevents the background from repeating */
             background-attachment: fixed; /* Makes the background fixed during scrolling */
+            background-size: cover;
             display: flex;
             flex-direction: column;
             align-items: center;
@@ -238,7 +239,7 @@ console.log('Retrieved password:', password);  // Debugging statement
 
         let subjectsSemester3WithFailed = [];
 
-        const subjectsToCheckVersion2and4 = ["uzw164", "uuw130", "ekt102", "eqt101", "ekt120", "ekt101"];
+        const subjectsToCheckVersion2 = ["ekt102", "eqt101", "ekt120", "ekt101"];
 
         // Load user data and initialize the page
         document.addEventListener('DOMContentLoaded', async function () {
@@ -291,38 +292,34 @@ console.log('Retrieved password:', password);  // Debugging statement
     get(dbRef).then((snapshot) => {
         let newSubjectCode = subjectCode.toLowerCase();
         let existingGrade = null;
-        const subjectsToCheckVersion2and4 = ["uzw164", "uuw130", "ekt102", "eqt101", "ekt120", "ekt101"];
+        const subjectsToCheckVersion2 = ["ekt102", "eqt101", "ekt120", "ekt101"];
 
         if (snapshot.exists()) {
             const subjects = snapshot.val();
             const subjectKeys = Object.keys(subjects);
-            let maxVersion = 1;
 
             subjectKeys.forEach(key => {
                 const baseKey = key.split('_v')[0];
                 if (baseKey === subjectCode.toLowerCase()) {
-                    const versionMatch = key.match(/_v(\d+)$/);
-                    const version = versionMatch ? parseInt(versionMatch[1], 10) : 1;
-                    if (version >= maxVersion) {
-                        maxVersion = version + 1;
-                    }
-                    if (version > 1) {
-                        existingGrade = subjects[key]?.grade;
-                        newSubjectCode = key; // Focus on the latest version
+                    if (subjectsToCheckVersion2.includes(baseKey)) {
+                        const versionMatch = key.match(/_v(\d+)$/);
+                        const version = versionMatch ? parseInt(versionMatch[1], 10) : 1;
+                        if (version >= 2) {
+                            newSubjectCode = key; // Focus on the latest version
+                        }
                     } else {
                         existingGrade = subjects[key]?.grade;
+                        newSubjectCode = key; // Focus on the latest version
                     }
                 }
             });
 
             // Create a new version for failing grades for specific subjects
-            if (subjectsToCheckVersion2and4.includes(subjectCode.toLowerCase())) {
-                if (['D', 'D-', 'F'].includes(grade)) {
+            if (subjectsToCheckVersion2.includes(subjectCode.toLowerCase())) {
+  
                     newSubjectCode = `${subjectCode.toLowerCase()}_v2`;
-                } else if (['D', 'D-', 'F'].includes(existingGrade)) {
-                    newSubjectCode = `${subjectCode.toLowerCase()}_v4`;
-                }
             }
+
         }
 
         const newDbRef = ref(database, 'users/' + userId + '/subjects/' + newSubjectCode);
@@ -336,9 +333,6 @@ console.log('Retrieved password:', password);  // Debugging statement
     });
 }
 
-
-
-
 function loadSubmittedData(userId) {
     const dbRef = ref(database, 'users/' + userId + '/subjects');
     get(dbRef).then((snapshot) => {
@@ -349,7 +343,7 @@ function loadSubmittedData(userId) {
             subjectsSemester3WithFailed = JSON.parse(sessionStorage.getItem('subjectsSemester3WithFailed')) || [];
             let latestSubjects = {};
             let totalCredits = 0;
-            const subjectsToCheckVersion2and4 = ["uzw164", "uuw130", "ekt102", "eqt101", "ekt120", "ekt101"];
+            const subjectsToCheckVersion2 = ["ekt102", "eqt101", "ekt120", "ekt101"];
 
             snapshot.forEach((subjectSnapshot) => {
                 const subjectCode = subjectSnapshot.key;
@@ -369,9 +363,9 @@ function loadSubmittedData(userId) {
                 if (subject) {
                     const subjectFullName = subjectMapping[baseCode.toLowerCase()] || baseCode; // Get full name from mapping
 
-                    // Only display version 2 and version 4 of the subject for specific subjects
-                    if (subjectsToCheckVersion2and4.includes(baseCode.toLowerCase())) {
-                        if (subjectData.version === 2 || subjectData.version === 4) {
+                    // Only display version 2 of the subject for specific subjects
+                    if (subjectsToCheckVersion2.includes(baseCode.toLowerCase())) {
+                        if (subjectData.version === 2) {
                             displaySubmittedData(subjectFullName, subjectData.grade, subjectData.subjectCode); // Pass the subjectCode for proper deletion
                             totalCredits += subject.creditHour;
                         }
@@ -391,6 +385,7 @@ function loadSubmittedData(userId) {
         console.error('Error loading submitted data:', error);
     });
 }
+
 
 
 
@@ -442,7 +437,7 @@ function checkAllSubjectsSubmitted(userId) {
         if (snapshot.exists()) {
             let totalCredits = 0;
             let latestSubjects = {};
-            const subjectsToCheckVersion2and4 = ["uzw164", "uuw130", "ekt102", "eqt101", "ekt120", "ekt101"];
+            const subjectsToCheckVersion2 = ["ekt102", "eqt101", "ekt120", "ekt101"];
 
             snapshot.forEach((subjectSnapshot) => {
                 const subjectCode = subjectSnapshot.key;
@@ -450,7 +445,7 @@ function checkAllSubjectsSubmitted(userId) {
                 const subjectBaseCode = subjectCode.split('_v')[0];
                 const subjectVersion = subjectCode.includes('_v') ? parseInt(subjectCode.split('_v')[1]) : 1;
 
-                // Include failing subjects only if they are version 2 or 4 for specific subjects
+                // Include failing subjects only if they are version 2 for specific subjects
                 if (!latestSubjects[subjectBaseCode] || (latestSubjects[subjectBaseCode].version < subjectVersion)) {
                     latestSubjects[subjectBaseCode] = { grade, version: subjectVersion };
                 }
@@ -460,8 +455,9 @@ function checkAllSubjectsSubmitted(userId) {
                 const subjectData = latestSubjects[baseCode];
                 const subject = subjectsSemester3WithFailed.find(sub => sub.code.toLowerCase() === baseCode.toLowerCase());
                 if (subject) {
-                    if (subjectsToCheckVersion2and4.includes(baseCode.toLowerCase())) {
-                        if (subjectData.version === 2 || subjectData.version === 4) {
+                    // Include failing subjects only if they are version 2 for specific subjects
+                    if (subjectsToCheckVersion2.includes(baseCode.toLowerCase())) {
+                        if (subjectData.version === 2) {
                             totalCredits += subject.creditHour;
                         }
                     } else {
@@ -484,6 +480,7 @@ function checkAllSubjectsSubmitted(userId) {
         console.error('Error checking subjects:', error);
     });
 }
+
 
 
 // Event listener for marks form submission

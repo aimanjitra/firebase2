@@ -17,7 +17,6 @@
             background-size: cover; /* Ensures the background covers the entire screen */
             background-repeat: no-repeat; /* Prevents the background from repeating */
             background-attachment: fixed; /* Makes the background fixed during scrolling */
-            background-size: cover;
             display: flex;
             flex-direction: column;
             align-items: center;
@@ -243,43 +242,43 @@ console.log('Retrieved password:', password);  // Debugging statement
 
         // Load user data and initialize the page
         document.addEventListener('DOMContentLoaded', async function () {
-            const userData = await verifyUser(username, password);
-            if (userData) {
-                document.querySelector('.container-marks').style.display = 'block';
-                loadSubmittedData(username);
-            }
+    const userData = await verifyUser(username, password);
+    if (userData) {
+        document.querySelector('.container-marks').style.display = 'block';
+        loadSubmittedData(sessionStorage.getItem('userId'));  // Call the function with the userId from sessionStorage
+    }
 
-            // Retrieve the stored schedule and display it
-            const storedSchedule = sessionStorage.getItem('newSchedule2');
-            const schedule1 = sessionStorage.getItem('schedule1');
-            const schedule2 = sessionStorage.getItem('schedule2');
+    // Retrieve the stored schedule and display it
+    const storedSchedule = sessionStorage.getItem('newSchedule2');
+    const schedule1 = sessionStorage.getItem('schedule1');
+    const schedule2 = sessionStorage.getItem('schedule2');
 
-            if (storedSchedule) {
-            const newSchedule2Container = document.getElementById('newSchedule2');
-            newSchedule2Container.innerHTML = storedSchedule;
+    if (storedSchedule) {
+        const newSchedule2Container = document.getElementById('newSchedule2');
+        newSchedule2Container.innerHTML = storedSchedule;
 
-                    if (schedule1 && schedule2) {
-                        const schedule1Container = document.createElement('div');
-                        schedule1Container.innerHTML = schedule1;
-                        newSchedule2Container.appendChild(schedule1Container);
-        
-                        const schedule2Container = document.createElement('div');
-                        schedule2Container.innerHTML = schedule2;
-                        newSchedule2Container.appendChild(schedule2Container);
-                    }
-                }
+        if (schedule1 && schedule2) {
+            const schedule1Container = document.createElement('div');
+            schedule1Container.innerHTML = schedule1;
+            newSchedule2Container.appendChild(schedule1Container);
 
-            // Populate the subject select options based on subjectsSemester3WithFailed
-            subjectsSemester3WithFailed = JSON.parse(sessionStorage.getItem('subjectsSemester3WithFailed')) || [];
+            const schedule2Container = document.createElement('div');
+            schedule2Container.innerHTML = schedule2;
+            newSchedule2Container.appendChild(schedule2Container);
+        }
+    }
 
-            const subjectSelect = document.getElementById('subjectCode');
-            subjectsSemester3WithFailed.forEach(subject => {
-                const option = document.createElement('option');
-                option.value = subject.code.toLowerCase();
-                option.textContent = `${subject.code} - ${subject.name}`;
-                subjectSelect.appendChild(option);
-            });
-        });
+    // Populate the subject select options based on subjectsSemester3WithFailed
+    subjectsSemester3WithFailed = JSON.parse(sessionStorage.getItem('subjectsSemester3WithFailed')) || [];
+
+    const subjectSelect = document.getElementById('subjectCode');
+    subjectsSemester3WithFailed.forEach(subject => {
+        const option = document.createElement('option');
+        option.value = subject.code.toLowerCase();
+        option.textContent = `${subject.code} - ${subject.name}`;
+        subjectSelect.appendChild(option);
+    });
+});
 
         function addSubjectGrade(subjectCode, grade) {
     const userId = sessionStorage.getItem('userId');
@@ -385,6 +384,7 @@ function loadSubmittedData(userId) {
         console.error('Error loading submitted data:', error);
     });
 }
+
 
 
 
@@ -529,7 +529,7 @@ document.getElementById('resultButton').addEventListener('click', () => {
         name: subject.name
     })));
 
-    window.location.href = `https://aimanjitra.github.io/firebase2/sem3.html?username=${username}&password=${password}`;
+     window.location.href = `https://aimanjitra.github.io/firebase2/sem3.html?username=${username}&password=${password}`;
 });
 
 

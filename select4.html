@@ -18,6 +18,7 @@
             background-repeat: no-repeat; /* Prevents the background from repeating */
             background-attachment: fixed; /* Makes the background fixed during scrolling */
             background-size: cover;
+
             display: flex;
             flex-direction: column;
             align-items: center;
@@ -237,53 +238,54 @@
 
         // Load user data and initialize the page
         document.addEventListener('DOMContentLoaded', async function () {
-            const userData = await verifyUser(username, password);
-            if (userData) {
-                console.log('User data retrieved successfully:', userData);
-                document.querySelector('.container-marks').style.display = 'block';
-                loadSubmittedData(username);
-            } else {
-                console.log('Failed to retrieve user data.');
-            }
+    const userData = await verifyUser(username, password);
+    if (userData) {
+        console.log('User data retrieved successfully:', userData);
+        document.querySelector('.container-marks').style.display = 'block';
+        loadSubmittedData(sessionStorage.getItem('userId')); // Ensure this is called with the userId from sessionStorage
+    } else {
+        console.log('Failed to retrieve user data.');
+    }
 
-            // Retrieve the stored schedule and display it
-            const storedSchedule = sessionStorage.getItem('newSchedule3');
-            const schedule1 = sessionStorage.getItem('schedule1');
-            const schedule2 = sessionStorage.getItem('schedule2');
+    // Retrieve the stored schedule and display it
+    const storedSchedule = sessionStorage.getItem('newSchedule3');
+    const schedule1 = sessionStorage.getItem('schedule1');
+    const schedule2 = sessionStorage.getItem('schedule2');
 
-            console.log('Stored schedule:', storedSchedule);
-            console.log('Stored schedule1:', schedule1);
-            console.log('Stored schedule2:', schedule2);
-            
-            if (storedSchedule) {
-            const newSchedule3Container = document.getElementById('newSchedule3');
-            newSchedule3Container.innerHTML = storedSchedule;
+    console.log('Stored schedule:', storedSchedule);
+    console.log('Stored schedule1:', schedule1);
+    console.log('Stored schedule2:', schedule2);
+    
+    if (storedSchedule) {
+        const newSchedule3Container = document.getElementById('newSchedule3');
+        newSchedule3Container.innerHTML = storedSchedule;
 
-                    if (schedule1 && schedule2) {
-                        const schedule1Container = document.createElement('div');
-                        schedule1Container.innerHTML = schedule1;
-                        newSchedule3Container.appendChild(schedule1Container);
-        
-                        const schedule2Container = document.createElement('div');
-                        schedule2Container.innerHTML = schedule2;
-                        newSchedule3Container.appendChild(schedule2Container);
-                    }
-                } else {
-                console.log('No stored schedule found.');
-            }
+        if (schedule1 && schedule2) {
+            const schedule1Container = document.createElement('div');
+            schedule1Container.innerHTML = schedule1;
+            newSchedule3Container.appendChild(schedule1Container);
 
-            // Populate the subject select options based on subjectsSemester3WithFailed
-            subjectsSemester4WithFailed = JSON.parse(sessionStorage.getItem('subjectsSemester4WithFailed')) || [];
-            console.log('subjectsSemester4WithFailed:', subjectsSemester4WithFailed);
+            const schedule2Container = document.createElement('div');
+            schedule2Container.innerHTML = schedule2;
+            newSchedule3Container.appendChild(schedule2Container);
+        }
+    } else {
+        console.log('No stored schedule found.');
+    }
 
-            const subjectSelect = document.getElementById('subjectCode');
-            subjectsSemester4WithFailed.forEach(subject => {
-                const option = document.createElement('option');
-                option.value = subject.code.toLowerCase();
-                option.textContent = `${subject.code.toUpperCase()} - ${subject.name}`;
-                subjectSelect.appendChild(option);
-            });
-        });
+    // Populate the subject select options based on subjectsSemester4WithFailed
+    subjectsSemester4WithFailed = JSON.parse(sessionStorage.getItem('subjectsSemester4WithFailed')) || [];
+    console.log('subjectsSemester4WithFailed:', subjectsSemester4WithFailed);
+
+    const subjectSelect = document.getElementById('subjectCode');
+    subjectsSemester4WithFailed.forEach(subject => {
+        const option = document.createElement('option');
+        option.value = subject.code.toLowerCase();
+        option.textContent = `${subject.code.toUpperCase()} - ${subject.name}`;
+        subjectSelect.appendChild(option);
+    });
+});
+
 
         function addSubjectGrade(subjectCode, grade) {
     const userId = sessionStorage.getItem('userId');
@@ -360,6 +362,11 @@ function loadSubmittedData(userId) {
                 const grade = subjectSnapshot.val().grade;
                 const subjectBaseCode = subjectCode.split('_v')[0];
                 const subjectVersion = subjectCode.includes('_v') ? parseInt(subjectCode.split('_v')[1]) : 1;
+
+                // Exclude specific subjects
+                if (subjectBaseCode.toLowerCase() === 'uuw130' || subjectBaseCode.toLowerCase() === 'uzw164') {
+                    return; // Skip these subjects
+                }
 
                 // Store only the latest version of subjects
                 if (!latestSubjects[subjectBaseCode] || (latestSubjects[subjectBaseCode].version < subjectVersion)) {
